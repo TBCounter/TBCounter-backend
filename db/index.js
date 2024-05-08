@@ -1,8 +1,7 @@
-import { Sequelize } from '@sequelize/core';
-import { PostgresDialect } from '@sequelize/postgres';
+const Sequelize = require("sequelize");
 
-export const sequelize = new Sequelize({
-    dialect: PostgresDialect,
+const sequelize = new Sequelize({
+    dialect: 'postgres',
     database: 'mydb',
     user: 'myuser',
     password: 'mypass',
@@ -11,3 +10,14 @@ export const sequelize = new Sequelize({
     ssl: true,
     clientMinMessages: 'notice',
 });
+
+
+
+const db = {};
+
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
+
+db.users = require("./models/user")(sequelize, Sequelize);
+
+module.exports = db;
