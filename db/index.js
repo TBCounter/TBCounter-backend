@@ -2,15 +2,14 @@ const Sequelize = require("sequelize");
 
 const sequelize = new Sequelize({
     dialect: 'postgres',
-    database: 'mydb',
-    user: 'myuser',
-    password: 'mypass',
-    host: 'localhost',
+    database: 'tbcounter',
+    user: 'admin',
+    password: 'admin',
+    host: 'db',
     port: 5432,
     ssl: true,
     clientMinMessages: 'notice',
 });
-
 
 
 const db = {};
