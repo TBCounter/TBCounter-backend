@@ -5,9 +5,6 @@ module.exports = (sequelize, Sequelize) => {
       },
       report_query: {
         type: Sequelize.STRING
-      },
-      account_id: {
-        type: Sequelize.INTEGER
       }
   });
 

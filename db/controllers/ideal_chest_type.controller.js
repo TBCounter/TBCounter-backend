@@ -1,24 +1,22 @@
 const db = require("../index.js");
 
-const IdealChestType = db.ideal_chest_types;
+const ChestType = db.chest_types;
 
 exports.create = (req, res) => {
 
-  const ideal_chest_type = {
+  const chest_type = {
     hash: req.body.hash,
     path: req.body.path,
     text: req.body.text,
-    
-    published: req.body.published ? req.body.published : false
 };
 
-IdealChestType.create(ideal_chest_type)
+ChestType.create(chest_type)
     .then(data => {
         res.send(data);
     })
     .catch(err => {
         res.status(500).send({
             message:
-                err.message || "Some error occurred while creating the Account."
+                err.message || "Some error occurred while creating the Chest Type."
         });
     });}

@@ -8,7 +8,6 @@ exports.create = (req, res) => {
     login: req.body.login,
     password: req.body.password,
     isTriumph: req.body.isTriumph,
-    user_id: req.body.user_id,
     name: req.body.name,
     clan: req.body.clan,
     avatar: req.body.avatar,
@@ -16,8 +15,6 @@ exports.create = (req, res) => {
     selenium_url: req.body.selenium_url,
     selenium_url_id: req.body.selenium_url_id,
     vip: req.body.vip,
-
-    published: req.body.published ? req.body.published : false
 };
 
 Account.create(account)

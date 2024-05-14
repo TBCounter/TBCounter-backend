@@ -14,8 +14,6 @@ exports.create = (req, res) => {
     const user = {
         username: req.body.username,
         email: req.body.email,
-
-        published: req.body.published ? req.body.published : false
     };
 
     User.create(user)

@@ -3,9 +3,6 @@ module.exports = (sequelize, Sequelize) => {
     url: {
       type: Sequelize.STRING
     },
-    account_id: {
-      type: Sequelize.INTEGER
-    },
     cookies: {
       type: Sequelize.STRING
     },

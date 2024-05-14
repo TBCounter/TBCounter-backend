@@ -9,9 +9,7 @@ module.exports = (sequelize, Sequelize) => {
       isTriumph: {
         type: Sequelize.BOOLEAN
       },
-      user_id: {
-        type: Sequelize.INTEGER
-      },
+
       name: {
         type: Sequelize.STRING
       },

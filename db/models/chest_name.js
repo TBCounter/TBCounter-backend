@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const IdealChestType = sequelize.define("ideal_chest_type", {
+  const ChestName = sequelize.define("chest_name", {
     hash: {
       type: Sequelize.STRING
     },
@@ -13,5 +13,5 @@ module.exports = (sequelize, Sequelize) => {
 
   
 
-  return IdealChestType;
+  return ChestName;
 };
