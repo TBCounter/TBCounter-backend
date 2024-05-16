@@ -1,15 +1,17 @@
 module.exports = (sequelize, Sequelize) => {
     const User = sequelize.define("user", {
-        title: {
+        username: {
+            type: Sequelize.STRING,
+        },
+        email: {
             type: Sequelize.STRING
         },
-        description: {
+        password: {
             type: Sequelize.STRING
-        },
-        published: {
-            type: Sequelize.BOOLEAN
         }
     });
 
     return User;
 };
+
+//has relationship
