@@ -35,23 +35,23 @@ db.accounts.belongsTo(db.users)
 db.accounts.hasMany(db.chest_rules)
 db.chest_rules.belongsTo(db.accounts)
 
-db.chest_names.hasMany(db.chest_rules, {foreignKey: 'Chest_name'})
+db.chest_names.hasMany(db.chest_rules)
 db.chest_rules.belongsTo(db.chest_names)
 
-db.chest_types.hasMany(db.chest_rules, {foreignKey: 'Chest_type'})
+db.chest_types.hasMany(db.chest_rules)
 db.chest_rules.belongsTo(db.chest_types)
 
 //chest relationships
 db.accounts.hasMany(db.chests)
 db.chests.belongsTo(db.accounts)
 
-db.chest_types.hasMany(db.chests, {foreignKey: 'Chest_type'})
+db.chest_types.hasMany(db.chests)
 db.chests.belongsTo(db.chest_types)
 
-db.chest_names.hasMany(db.chests, {foreignKey: 'Chest_name'})
+db.chest_names.hasMany(db.chests)
 db.chests.belongsTo(db.chest_names)
 
-db.players.hasMany(db.chests, {foreignKey: 'Player'})
+db.players.hasMany(db.chests)
 db.chests.belongsTo(db.players)
 
 //player relationships
