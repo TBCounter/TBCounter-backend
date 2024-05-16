@@ -1,17 +1,20 @@
 module.exports = (sequelize, Sequelize) => {
-  const IdealChestName = sequelize.define("ideal_chest_name", {
+  const Player = sequelize.define("player", {
     hash: {
       type: Sequelize.STRING
     },
     path: {
       type: Sequelize.STRING
     },
-    text: {
+    name: {
       type: Sequelize.STRING
     },
+    level: {
+      type: Sequelize.INTEGER
+    }
   });
 
-  
-
-  return IdealChestName;
+  return Player;
 };
+
+//has relationship
