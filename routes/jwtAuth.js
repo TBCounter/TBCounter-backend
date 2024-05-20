@@ -2,16 +2,19 @@ const db = require('../db/index')
 
 const router = require('express').Router()
 const bcrypt = require('bcrypt')
+const jwtGenerator = require('../utils/jwtGenerator')
+const validInfo = require('../middleware/validInfo')
 
-// registration
-router.post('/register', async (req, res) => {
+// registration route
+
+router.post('/register', validInfo, async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, password } = await req.body
 
-    const user = await db.users.findAll({where: {email: email }})
-    res.json(user.rows)
 
-    if (user.rows.length !== 0) {
+    const user = await db.users.findOne({where: {email: email }})
+
+    if (user) {
       return res.status(401).send('user already exists')
     }
 
@@ -21,11 +24,41 @@ router.post('/register', async (req, res) => {
     const bcryptPassword = await bcrypt.hash(password, salt)
 
     const newUser = await db.users.create({ email: email, password: bcryptPassword })
-    res.json(newUser.rows[0])
+    const token = jwtGenerator(newUser.id)
+
+    res.status(200).json({token})
   } catch (err) {
-    console.error(err.message)
-    res.status(500).send("Server Error")
+      console.error(err.message)
+      res.status(500).send(err.message)
   }
 })
+
+// login route
+
+router.post("/login", validInfo, async (req, res) => {
+  try {
+
+    const { email, password } = req.body
+
+    const user = await db.users.findOne({where: {email: email }})
+
+    if (!user) {
+      return res.status(401).send('password or email is incorrect')
+    }
+
+    const validPassword = await bcrypt.compare(password, user.password)
+
+    if (!validPassword) {
+      return res.status(401).send('password or email is incorrect')
+    }
+
+    const token = jwtGenerator(user.id)
+
+    res.status(200).json({token})
+  }
+  catch (err) {
+    console.error(err.message)
+    res.status(500).send(err.message)
+}})
 
 module.exports = router;
