@@ -35,6 +35,9 @@ services:
       - db
     networks:
       - postgres
+    env_file:
+      - .env
+
 networks:
   postgres:
     driver: bridge
