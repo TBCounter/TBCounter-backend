@@ -19,7 +19,8 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       avatar: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: __dirname + '/images'
       },
       is_locked: {
         type: Sequelize.BOOLEAN

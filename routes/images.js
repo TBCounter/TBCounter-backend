@@ -4,18 +4,7 @@ var path = require('path')
 
 // image route
 router.get('/', function (req, res) {
-  const options = {
-      root: path.join(__dirname + '/images')
-  };
-
-  const fileName = 'default_user_1.jpg';
-  res.sendFile(fileName, options, function (err) {
-      if (err) {
-          console.error('Error sending file:', err);
-      } else {
-          console.log('Sent:', fileName);
-      }
-  });
+  res.status(200).send('respond with images')
 });
 
 module.exports = router;
