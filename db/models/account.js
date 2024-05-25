@@ -1,10 +1,12 @@
 module.exports = (sequelize, Sequelize) => {
   const Account = sequelize.define("account", {
       login: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: true
       },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: true
       },
       isTriumph: {
         type: Sequelize.BOOLEAN
@@ -24,10 +26,10 @@ module.exports = (sequelize, Sequelize) => {
       },
 
 
-      selenium_url: {
+      node_url: {
         type: Sequelize.STRING
       },
-      selenium_url_id: {
+      node_url_id: {
         type: Sequelize.STRING
       },
 
