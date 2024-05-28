@@ -13,7 +13,8 @@ module.exports = (sequelize, Sequelize) => {
       },
 
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       clan: {
         type: Sequelize.STRING

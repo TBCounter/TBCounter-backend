@@ -10,8 +10,12 @@ const db = require('../db/index')
 router.post('/', authorization, async (req, res) => {
   try {
     const { name } = await req.body
-    
-    const newAccount = await db.accounts.create({ name: name, userId: userId })
+
+    if (!name) {
+      return res.status(401).send('account must have a name')
+    }
+
+    const newAccount = await db.accounts.create({ name: name, userId: req.user })
     res.status(200).json({newAccount})
   } 
   catch (err) {
