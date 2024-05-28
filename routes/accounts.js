@@ -1,16 +1,15 @@
 var express = require('express');
 var router = express.Router();
-var image = require('../routes/images')
+const authorization = require('../middleware/authorization')
 
 const db = require('../db/index')
 
 
 // create new account
 
-router.post('/', async (req, res) => {
+router.post('/', authorization, async (req, res) => {
   try {
-    const { name, userId } = await req.body
-
+    const { name } = await req.body
     
     const newAccount = await db.accounts.create({ name: name, userId: userId })
     res.status(200).json({newAccount})
@@ -20,5 +19,12 @@ router.post('/', async (req, res) => {
     res.status(500).send(err.message)
 } 
 });
+
+/*
+{
+  "email": "helloworld@gmail.com",
+  "password": "123123123"
+}  
+*/
 
 module.exports = router;
