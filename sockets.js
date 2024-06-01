@@ -23,10 +23,17 @@ nodeIo.on('connection', (socket) => {
 
     addNode(socket.id, 'ready')
 
-    socket.on('disconnect', async() => {
+    socket.on('disconnect', async () => {
         console.log(await getAllNodes())
         console.log('node disconnected');
     });
+
+    socket.emit('run_account', {
+        address: 'https://totalbattle.com',
+        cookies: {
+
+        }
+    })
 });
 
 //user namespace
