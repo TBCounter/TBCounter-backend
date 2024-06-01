@@ -4,6 +4,7 @@ const router = require('express').Router()
 const bcrypt = require('bcrypt')
 const jwtGenerator = require('../utils/jwtGenerator')
 const validInfo = require('../middleware/validInfo')
+const authorization = require('../middleware/authorization')
 
 // registration route
 
@@ -25,7 +26,6 @@ router.post('/register', validInfo, async (req, res) => {
 
     const newUser = await db.users.create({ email: email, password: bcryptPassword })
     const token = jwtGenerator(newUser.id)
-
     res.status(200).json({token})
   } catch (err) {
       console.error(err.message)
@@ -59,6 +59,15 @@ router.post("/login", validInfo, async (req, res) => {
   catch (err) {
     console.error(err.message)
     res.status(500).send(err.message)
-}})
+}});
 
-module.exports = router;
+router.get('/is-verify', authorization, async (req, res) => {
+  try {
+
+    res.status(200).send('true')
+  } catch (err) {
+      console.error(err.message)
+      res.status(500).send(err.message)
+  }})
+
+module.exports = router

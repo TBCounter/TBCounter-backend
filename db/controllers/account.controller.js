@@ -12,8 +12,8 @@ exports.create = (req, res) => {
     clan: req.body.clan,
     avatar: req.body.avatar,
     is_locked: req.body.is_locked,
-    selenium_url: req.body.selenium_url,
-    selenium_url_id: req.body.selenium_url_id,
+    node_url: req.body.node_url,
+    node_url_id: req.body.node_url_id,
     vip: req.body.vip,
 };
 

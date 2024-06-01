@@ -1,33 +1,37 @@
 module.exports = (sequelize, Sequelize) => {
   const Account = sequelize.define("account", {
       login: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: true
       },
       password: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: true
       },
       isTriumph: {
         type: Sequelize.BOOLEAN
       },
 
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       clan: {
         type: Sequelize.STRING
       },
       avatar: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: __dirname + '/images'
       },
       is_locked: {
         type: Sequelize.BOOLEAN
       },
 
 
-      selenium_url: {
+      node_url: {
         type: Sequelize.STRING
       },
-      selenium_url_id: {
+      node_url_id: {
         type: Sequelize.STRING
       },
 
