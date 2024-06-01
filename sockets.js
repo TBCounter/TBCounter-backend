@@ -14,7 +14,11 @@ var { client, addNode, updateNodeStatus, getNodeStatus, removeNode, getAllNodes 
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-io.on('connection', (socket) => {
+const userIo = io.of('/user')
+const nodeIo = io.of('/node')
+
+//node namespace
+nodeIo.on('connection', (socket) => {
     console.log('node connected');
 
     addNode(socket.id, 'ready')
@@ -25,6 +29,9 @@ io.on('connection', (socket) => {
     });
 });
 
-
+//user namespace
+userIo.on('connection', (socket) => {
+    console.log('user connected');
+});
 
 module.exports = { server, client };
