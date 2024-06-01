@@ -6,29 +6,24 @@
 
 var app = require('../app');
 var debug = require('debug')('tbcounter-backend:server');
-var http = require('http');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
 
-/**
- * Listen on provided port, on all network interfaces.
- */
+var { server, client } = require('../sockets');
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
 
-server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-
 /**
  * Normalize a port into a number, string, or false.
  */
@@ -88,3 +83,20 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
+async function startServer() {
+  server.listen(port);
+
+  try {
+
+    await client.connect();
+  }
+  catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1); // Завершаем работу приложения, если подключение не удалось
+  }
+
+}
+
+startServer()
+
