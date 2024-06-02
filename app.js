@@ -14,7 +14,7 @@ var app = express();
 
 const db = require("./db/index.js");
 
-db.sequelize.sync({ force: true })
+db.sequelize.sync({ force: false })
   .then(() => {
     console.log("Synced db.");
   })
