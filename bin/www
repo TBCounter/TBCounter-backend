@@ -7,18 +7,13 @@
 var app = require('../app');
 var debug = require('debug')('tbcounter-backend:server');
 
-/**
- * Get port from environment and store in Express.
- */
+
+var http = require('http');
+
+var server = http.createServer(app);
 
 
-
-/**
- * Create HTTP server.
- */
-
-
-var { server, client } = require('../sockets');
+var { client, initializeSockets } = require('../sockets');
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
@@ -27,6 +22,8 @@ server.on('listening', onListening);
 /**
  * Normalize a port into a number, string, or false.
  */
+
+initializeSockets(server);
 
 function normalizePort(val) {
   var port = parseInt(val, 10);
