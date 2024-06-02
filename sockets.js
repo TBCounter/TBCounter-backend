@@ -40,4 +40,11 @@ const initializeSockets = (server) => {
     return io;
 };
 
-module.exports = { initializeSockets, nodeIo, userIo, client };
+const getNodeIo = () => {
+    if (!nodeIo) {
+        throw new Error('Sockets not initialized yet');
+    }
+    return nodeIo;
+};
+
+module.exports = { initializeSockets, nodeIo, userIo, client, getNodeIo };

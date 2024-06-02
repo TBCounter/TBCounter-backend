@@ -4,7 +4,7 @@ const authorization = require('../middleware/authorization')
 
 const db = require('../db/index')
 
-const { nodeIo } = require('../sockets')
+const { getNodeIo } = require('../sockets')
 
 // create new account
 
@@ -39,6 +39,7 @@ router.post('/run', authorization, async (req, res) => {
     if (!account) {
       return res.status(404).send('Account not found')
     }
+    const nodeIo = getNodeIo();
     nodeIo.emit('run_account', {
       address: 'https://totalbattle.com',
       login: account.login,
