@@ -54,6 +54,17 @@ router.post('/run', authorization, async (req, res) => {
   }
 });
 
+router.get('/', async function(req, res) {
+  try {
+    const accounts = await db.accounts.findAll({ userId: req.user })
+    res.status(200).json({accounts});
+  }
+  catch (err) {
+    console.error(err.message)
+    res.status(500).send(err.message)
+  }
+});
+
 /*
 {
   "email": "helloworld@gmail.com",

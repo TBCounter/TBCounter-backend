@@ -6,7 +6,6 @@ var logger = require('morgan');
 const cors = require("cors");
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 var authRouter = require('./routes/jwtAuth.js');
 var accountsRouter = require('./routes/accounts.js');
 var imagesRouter = require('./routes/images.js')
@@ -40,7 +39,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // routes
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/accounts', accountsRouter);
 app.use('/images', imagesRouter);
