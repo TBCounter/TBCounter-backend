@@ -9,6 +9,8 @@ var indexRouter = require('./routes/index');
 var authRouter = require('./routes/jwtAuth.js');
 var accountsRouter = require('./routes/accounts.js');
 var imagesRouter = require('./routes/images.js')
+var changelogRouter = require('./routes/changelog.js')
+
 var app = express();
 
 const db = require("./db/index.js");
@@ -42,6 +44,7 @@ app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/accounts', accountsRouter);
 app.use('/images', imagesRouter);
+app.use('/changelog', changelogRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
