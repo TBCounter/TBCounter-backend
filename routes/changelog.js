@@ -8,10 +8,10 @@ router.get('/', async (req, res) => {
     const { lang } = await req.body
 
     if (lang === 'EN') {
-      let logs = yaml.load(fs.readFileSync('./changelogEN.yaml', 'utf8'));
+      let logs = yaml.load(fs.readFileSync('./changelogs/changelogEN.yaml', 'utf8'));
       res.status(200).send(logs)
     } else if (lang === 'RU') {
-      let logs = yaml.load(fs.readFileSync('./changelogRU.yaml', 'utf8'));
+      let logs = yaml.load(fs.readFileSync('./changelogs/changelogRU.yaml', 'utf8'));
       res.status(200).send(logs)
     }
   } catch (err) {
