@@ -18,7 +18,7 @@ const initializeSockets = (server) => {
     userIo = io.of('/user');
     nodeIo = io.of('/node');
 
-    const { addNode, getAllNodes, removeNode } = require('./redisNodes');
+    const { addNode, getAllNodes, removeNode, updateNodeStatus } = require('./redisNodes');
 
     // node namespace
     nodeIo.on('connection', (socket) => {
