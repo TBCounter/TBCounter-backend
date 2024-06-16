@@ -54,6 +54,38 @@ router.post('/run', authorization, async (req, res) => {
   }
 });
 
+router.post('/cookie', authorization, async (req, res) => {
+  try {
+    const { accountId, cookie, url } = await req.body
+    
+
+        if (!accountId) {
+          res.status(400).send('provide account ID')
+        }
+          
+        if (!cookie) {
+          res.status(400).send('provide cookie')
+        }
+          
+        if (!url) {
+          res.status(400).send('provide url')
+        }
+    
+      const nodeIo = getNodeIo();
+      nodeIo.emit('run_cookie', {
+        address: 'https://totalbattle.com',
+        accountId: accountId,
+        cookie: cookie
+      })
+
+      res.status(200).send('Running cookie, please wait...')
+  }
+  catch (err) {
+    console.error(err.message)
+    res.status(500).send(err.message)
+  }
+})
+
 router.get('/', async function(req, res) {
   try {
     const accounts = await db.accounts.findAll({ userId: req.user })
