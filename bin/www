@@ -84,7 +84,7 @@ function onListening() {
 async function startServer() {
   server.listen(port);
 
-  await connect_storage().then(() => { console.log('connected to db') }).catch((e) => { console.log(e) })
+  await connect_storage().then(() => { console.log('connected to storage') }).catch((e) => { console.log(e) })
 
   try {
 
