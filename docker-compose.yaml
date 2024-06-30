@@ -37,6 +37,7 @@ services:
       - db
     networks:
       - backend
+      - mongo_network
     env_file:
       - .env
 
