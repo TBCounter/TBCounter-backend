@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-
-
 async function connect_storage() {
     console.log(process.env.MONGO_USER)
     console.log(process.env.MONGO_PASSWD)
@@ -11,7 +9,17 @@ async function connect_storage() {
 
 
 const chestSchema = new mongoose.Schema({
-    name: String
+    account_id: String,
+    got_at: Date,
+
+    // OCR readed values
+    name: String,
+    type: String,
+    source: String,
+    time: Date,
+
+    // s3 url
+    url: String,
 });
 
 
