@@ -10,6 +10,7 @@ var authRouter = require('./routes/jwtAuth.js');
 var accountsRouter = require('./routes/accounts.js');
 var imagesRouter = require('./routes/images.js')
 var changelogRouter = require('./routes/changelog.js')
+var chestRouter = require('./routes/chests.js')
 
 var app = express();
 
@@ -45,6 +46,7 @@ app.use('/auth', authRouter);
 app.use('/accounts', accountsRouter);
 app.use('/images', imagesRouter);
 app.use('/changelog', changelogRouter);
+app.use('/chest', chestRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

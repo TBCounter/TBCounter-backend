@@ -97,11 +97,4 @@ router.get('/', async function(req, res) {
   }
 });
 
-/*
-{
-  "email": "helloworld@gmail.com",
-  "password": "123123123"
-}  
-*/
-
 module.exports = router;
