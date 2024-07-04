@@ -11,7 +11,7 @@ let userIo = null;
 
 const { Server } = require("socket.io");
 
-const { mongoose, Chest } = require('./storage')
+const { Chest } = require('./storage')
 
 
 const initializeSockets = (server) => {
@@ -26,15 +26,7 @@ const initializeSockets = (server) => {
     nodeIo.on('connection', (socket) => {
         console.log('node connected');
         addNode(socket.id, 'ready');
-
-        socket.on('chest uploaded', async (chestname, chestBuffer) => {
-            console.log(chestname, chestBuffer)
-            const chestId = await Chest.create({
-                "name": chestname
-            })
-            socket.emit('chestid', chestId.id, chestname, chestBuffer)
-        })
-
+        
         socket.on('disconnect', async () => {
             console.log(await getAllNodes());
             removeNode(socket.id)
