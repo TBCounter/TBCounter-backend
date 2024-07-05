@@ -11,7 +11,7 @@ async function connect_storage() {
 const chestSchema = new mongoose.Schema({
     account_id: String,
     got_at: Date,
-    status: String, // UPLOADED, DOWNLOADED, PROCESSED, ERROR
+    status: String, // CREATED, UPLOADED, DOWNLOADED, PROCESSED, ERROR
     // OCR readed values
     name: String,
     type: String,
