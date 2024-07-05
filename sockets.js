@@ -11,6 +11,8 @@ let userIo = null;
 
 const { Server } = require("socket.io");
 
+const { Chest } = require('./storage')
+
 
 const initializeSockets = (server) => {
     const io = new Server(server);
@@ -24,7 +26,7 @@ const initializeSockets = (server) => {
     nodeIo.on('connection', (socket) => {
         console.log('node connected');
         addNode(socket.id, 'ready');
-
+        
         socket.on('disconnect', async () => {
             console.log(await getAllNodes());
             removeNode(socket.id)
