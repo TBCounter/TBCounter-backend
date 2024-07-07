@@ -27,7 +27,7 @@ router.post('/', async function (req, res) {
     got_at: new Date()
   })
 
-  let url = await getSignedUrl(chestId.id)
+  let url = await getSignedUrl(chestId.id) // add type
 
   await Chest.findByIdAndUpdate(chestId, {url: url})
   // Идти на AWS, получить ссылку для загрузки изрображения для файла с именем chestId.id
