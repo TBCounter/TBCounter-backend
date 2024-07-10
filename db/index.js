@@ -3,8 +3,8 @@ const Sequelize = require("sequelize");
 const sequelize = new Sequelize({
     dialect: 'postgres',
     database: 'tbcounter',
-    username: 'admin',
-    password: 'admin',
+    username: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
     host: 'db',
     port: 5432,
     ssl: true,
