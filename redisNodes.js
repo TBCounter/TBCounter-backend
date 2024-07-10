@@ -56,4 +56,8 @@ function getAllNodes() {
     });
 }
 
-module.exports = { client, addNode, updateNodeStatus, getNodeStatus, removeNode, getAllNodes }
+function deleteAllNodes() {
+    client.flushAll()
+}
+
+module.exports = { client, addNode, updateNodeStatus, getNodeStatus, removeNode, getAllNodes, deleteAllNodes }

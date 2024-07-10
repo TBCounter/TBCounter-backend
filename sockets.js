@@ -32,10 +32,6 @@ const initializeSockets = (server) => {
             removeNode(socket.id)
             console.log('node disconnected');
         });
-
-        socket.on('status', async (message) => {
-            updateNodeStatus(message)
-        });
     });
 
     // user namespace

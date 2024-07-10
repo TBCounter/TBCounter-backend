@@ -6,6 +6,8 @@ const db = require('../db/index')
 
 const { getNodeIo } = require('../sockets')
 
+const { getAllNodes, client, updateNodeStatus } = require('../redisNodes')
+
 // create new account
 
 router.post('/', authorization, async (req, res) => {
@@ -39,12 +41,26 @@ router.post('/run', authorization, async (req, res) => {
     if (!account) {
       return res.status(404).send('Account not found')
     }
+
+    const nodes = await getAllNodes()
+    let nodeId = ''
+    for (const property in nodes) {
+      let node = JSON.parse(nodes[property])
+      if (node.status = 'ready') {
+        nodeId = property
+      }
+    }
+    console.log(nodeId)
+
     const nodeIo = getNodeIo();
-    nodeIo.emit('run_account', {
+
+    nodeIo.to(nodeId).emit('run_account', {
       address: 'https://totalbattle.com',
       login: account.login,
       password: account.password
     })
+    
+    await client.hSet('nodes', nodeId, JSON.stringify({ status: 'busy', timestamp: Date.now() }))
 
     res.status(200).json({ result: "ok" })
   }
@@ -71,12 +87,24 @@ router.post('/cookie', authorization, async (req, res) => {
           res.status(400).send('provide url')
         }
     
-      const nodeIo = getNodeIo();
-      nodeIo.emit('run_cookie', {
+        const nodes = await getAllNodes()
+        let nodeId = ''
+        for (const property in nodes) {
+          let node = JSON.parse(nodes[property])
+          if (node.status = 'ready') {
+            nodeId = property
+          }
+        }
+        console.log(nodeId)
+        const nodeIo = getNodeIo();
+        
+        nodeIo.to(nodeId).emit('run_cookie', {
         address: 'https://totalbattle.com',
         accountId: accountId,
         cookie: cookie
       })
+
+      await client.hSet('nodes', nodeId, JSON.stringify({ status: 'busy', timestamp: Date.now() }))
 
       res.status(200).send('Running cookie, please wait...')
   }
