@@ -27,6 +27,10 @@ const initializeSockets = (server) => {
         console.log('node connected');
         addNode(socket.id, 'ready');
         
+        socket.on('cheststatus', async (status, chestId) => {
+            await Chest.findByIdAndUpdate(chestId, {status: status})
+        })
+        
         socket.on('disconnect', async () => {
             console.log(await getAllNodes());
             removeNode(socket.id)
