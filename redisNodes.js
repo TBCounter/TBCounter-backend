@@ -15,16 +15,8 @@ function addNode(nodeId, status) {
 }
 
 function updateNodeStatus(nodeId, status) {
-    client.hGet('nodes', nodeId, (err, data) => {
-        if (err) throw err;
-        if (data) {
-            let node = JSON.parse(data);
-            node.status = status;
-            node.timestamp = Date.now();
-            client.hSet('nodes', nodeId, JSON.stringify(node));
-        }
-    });
-}
+    client.hSet('nodes', nodeId, JSON.stringify({status: status, timestamp: Date.now()}))
+    }
 
 function getNodeStatus(nodeId, callback) {
     client.hGet('nodes', nodeId, (err, data) => {
