@@ -12,7 +12,6 @@ var imagesRouter = require('./routes/images.js')
 var changelogRouter = require('./routes/changelog.js')
 var chestRouter = require('./routes/chests.js')
 var databaseRouter = require('./routes/database.js')
-var OCRRouter = require('./routes/OCR.js')
 
 var app = express();
 
@@ -50,7 +49,6 @@ app.use('/images', imagesRouter);
 app.use('/changelog', changelogRouter);
 app.use('/chest', chestRouter)
 app.use('/db', databaseRouter)
-app.use('/ocr', OCRRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
