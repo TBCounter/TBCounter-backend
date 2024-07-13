@@ -19,18 +19,25 @@ const initializeSockets = (server) => {
 
     userIo = io.of('/user');
     nodeIo = io.of('/node');
+    OCRIo = io.of('/ocr');
 
-    const { addNode, getAllNodes, removeNode, updateNodeStatus } = require('./redisNodes');
+    const { addNode, getAllNodes, removeNode, updateNodeStatus, getFirstReadyNode } = require('./redisNodes');
 
     // node namespace
     nodeIo.on('connection', (socket) => {
         console.log('node connected');
         addNode(socket.id, 'ready');
-        
+
         socket.on('cheststatus', async (status, chestId) => {
-            await Chest.findByIdAndUpdate(chestId, {status: status})
+            const chest = await Chest.findByIdAndUpdate(chestId, { status: status })
+
+            if (status === 'UPLOADED') {
+                const readyOCRNode = getFirstReadyNode('ocr')
+                OCRIo.to(readyOCRNode).emit('process', chest)
+                updateNodeStatus(readyOCRNode, 'busy', 'ocr')
+            }
         })
-        
+
         socket.on('disconnect', async () => {
             console.log(await getAllNodes());
             removeNode(socket.id)
@@ -42,6 +49,19 @@ const initializeSockets = (server) => {
             console.log('node updated', message)
         });
     });
+
+
+    OCRIo.on('connection', (socket) => {
+        console.log('ocr node connected');
+        addNode(socket.id, 'ready', 'ocr');
+
+
+        socket.on('process_response', async (message) => {
+            const { chestId, name, type, source, time, status } = message
+            await Chest.findByIdAndUpdate(chestId, { name, type, source, time, status })
+            updateNodeStatus(socket.id, 'ready', 'ocr')
+        })
+    })
 
     // user namespace
     userIo.on('connection', (socket) => {
