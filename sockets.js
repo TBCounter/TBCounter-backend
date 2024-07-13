@@ -33,6 +33,10 @@ const initializeSockets = (server) => {
 
             if (status === 'UPLOADED') {
                 const readyOCRNode = getFirstReadyNode('ocr')
+                if (!readyOCRNode) {
+                    console.log('no ready ocr nodes')
+                    return
+                }
                 OCRIo.to(readyOCRNode).emit('process', chest)
                 updateNodeStatus(readyOCRNode, 'busy', 'ocr')
             }
