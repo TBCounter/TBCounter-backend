@@ -44,7 +44,7 @@ function getSignedUrl(fileName) {
       const params = {
           Bucket: bucketName,
           Key: fileName,
-          Expires: 60
+          Expires: 60*24*14
       };
 
       s3.getSignedUrl('putObject', params, (err, url) => {

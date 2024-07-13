@@ -29,16 +29,19 @@ const initializeSockets = (server) => {
         addNode(socket.id, 'ready');
 
         socket.on('cheststatus', async (status, chestId) => {
-            const chest = await Chest.findByIdAndUpdate(chestId, { status: status })
-
+            const chest = await Chest.findByIdAndUpdate(chestId, { status })
+            console.log('new chest', chest, status)
             if (status === 'UPLOADED') {
-                const readyOCRNode = getFirstReadyNode('ocr')
-                if (!readyOCRNode) {
+                console.log('yes, uploaded status')
+                const readyOCRNode = await getFirstReadyNode('ocr')
+                console.log('readyOCRNode', readyOCRNode)
+                console.log('readyOCRNode', Object.keys(readyOCRNode))
+                if (!Object.keys(readyOCRNode).length) {
                     console.log('no ready ocr nodes')
                     return
                 }
-                OCRIo.to(readyOCRNode).emit('process', chest)
-                updateNodeStatus(readyOCRNode, 'busy', 'ocr')
+                OCRIo.to(Object.keys(readyOCRNode)[0]).emit('process', chest)
+                updateNodeStatus(Object.keys(readyOCRNode)[0], 'busy', 'ocr')
             }
         })
 
@@ -49,8 +52,8 @@ const initializeSockets = (server) => {
         });
 
         socket.on("status", async (message) => {
+            console.log('node updated', { message, id: socket.id })
             updateNodeStatus(socket.id, message)
-            console.log('node updated', message)
         });
     });
 
@@ -65,6 +68,16 @@ const initializeSockets = (server) => {
             await Chest.findByIdAndUpdate(chestId, { name, type, source, time, status })
             updateNodeStatus(socket.id, 'ready', 'ocr')
         })
+
+        socket.on('disconnect', async () => {
+            removeNode(socket.id, 'ocr')
+            console.log('node disconnected');
+        });
+
+        socket.on("status", async (message) => {
+            console.log('node updated', { message, id: socket.id })
+            updateNodeStatus(socket.id, message, 'ocr')
+        });
     })
 
     // user namespace
