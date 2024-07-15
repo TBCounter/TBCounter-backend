@@ -46,7 +46,6 @@ router.post('/', async function (req, res) {
   res.status(200).json({ uploadLink: url, downloadLink: getUrl, chestId: chestId.id })
 });
 
-
 async function generateSignedUrl(objectKey) {
     try {
         // Create a GetObjectCommand
