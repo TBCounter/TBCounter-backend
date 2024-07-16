@@ -57,10 +57,10 @@ function getFirstReadyNode(storage) {
                 nodeId: key,
                 ...JSON.parse(data[key])
             })).filter(node => node.status === 'ready').at(0);
-
+            if (!nodes) return undefined
             return nodes
         } else {
-            return []
+            return undefined
         }
     });
 }

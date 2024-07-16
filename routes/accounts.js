@@ -96,6 +96,7 @@ router.post('/cookie', authorization, async (req, res) => {
           }
         }
         console.log(nodeId)
+        
         const nodeIo = getNodeIo();
         
         nodeIo.to(nodeId).emit('run_cookie', {
