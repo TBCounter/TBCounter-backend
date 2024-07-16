@@ -46,7 +46,7 @@ router.post('/run', authorization, async (req, res) => {
     let nodeId = ''
     for (const property in nodes) {
       let node = JSON.parse(nodes[property])
-      if (node.status = 'ready') {
+      if (node.status === 'ready') {
         nodeId = property
       }
     }
@@ -91,7 +91,7 @@ router.post('/cookie', authorization, async (req, res) => {
         let nodeId = ''
         for (const property in nodes) {
           let node = JSON.parse(nodes[property])
-          if (node.status = 'ready') {
+          if (node.status === 'ready') {
             nodeId = property
           }
         }
