@@ -9,17 +9,25 @@ client.on('error', (err) => {
 
 
 
-function addNode(nodeId, status, storage) {
+function addNode(nodeId, status) {
     console.log('node attached')
-    client.hSet(storage || 'nodes', nodeId, JSON.stringify({ status: status, timestamp: Date.now() }));
+    client.hSet('nodes', nodeId, JSON.stringify({ status: status, timestamp: Date.now() }));
 }
 
-function updateNodeStatus(nodeId, status, storage) {
-    client.hSet(storage || 'nodes', nodeId, JSON.stringify({ status: status, timestamp: Date.now() }))
+function updateNodeStatus(nodeId, status) {
+    client.hGet('nodes', nodeId, (err, data) => {
+        if (err) throw err;
+        if (data) {
+            let node = JSON.parse(data);
+            node.status = status;
+            node.timestamp = Date.now();
+            client.hSet('nodes', nodeId, JSON.stringify(node));
+        }
+    });
 }
 
-function getNodeStatus(nodeId, callback, storage) {
-    client.hGet(storage || 'nodes', nodeId, (err, data) => {
+function getNodeStatus(nodeId, callback) {
+    client.hGet('nodes', nodeId, (err, data) => {
         if (err) throw err;
         if (data) {
             callback(JSON.parse(data));
@@ -29,12 +37,12 @@ function getNodeStatus(nodeId, callback, storage) {
     });
 }
 
-function removeNode(nodeId, storage) {
-    client.hDel(storage || 'nodes', nodeId);
+function removeNode(nodeId) {
+    client.hDel('nodes', nodeId);
 }
 
-function getAllNodes(storage) {
-    return client.hGetAll(storage || 'nodes', (err, data) => {
+function getAllNodes() {
+    return client.hGetAll('nodes', (err, data) => {
         if (err) throw err;
         if (data) {
             let nodes = Object.keys(data).map(key => ({
@@ -48,26 +56,8 @@ function getAllNodes(storage) {
     });
 }
 
-
-function getFirstReadyNode(storage) {
-    return client.hGetAll(storage || 'nodes', (err, data) => {
-        if (err) throw err;
-        if (data) {
-            let nodes = Object.keys(data).map(key => ({
-                nodeId: key,
-                ...JSON.parse(data[key])
-            })).filter(node => node.status === 'ready').at(0);
-            if (!nodes) return undefined
-            return nodes
-        } else {
-            return undefined
-        }
-    });
-}
-
-
 function deleteAllNodes() {
     client.flushAll()
 }
 
-module.exports = { client, addNode, updateNodeStatus, getNodeStatus, removeNode, getAllNodes, deleteAllNodes, getFirstReadyNode }
+module.exports = { client, addNode, updateNodeStatus, getNodeStatus, removeNode, getAllNodes, deleteAllNodes }
