@@ -55,7 +55,7 @@ router.post('/run', authorization, async (req, res) => {
     const nodeIo = getNodeIo();
 
     nodeIo.to(nodeId).emit('run_account', {
-      address: 'https://totalbattle.com',
+      address: 'https://totalbattle.com', // run url is from request
       login: account.login,
       password: account.password
     })
@@ -99,7 +99,7 @@ router.post('/cookie', authorization, async (req, res) => {
         const nodeIo = getNodeIo();
         
         nodeIo.to(nodeId).emit('run_cookie', {
-        address: 'https://totalbattle.com',
+        address: 'https://totalbattle.com', // run url is from request
         accountId: accountId,
         cookie: cookie
       })
