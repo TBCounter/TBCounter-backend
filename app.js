@@ -4,7 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require("cors");
-var { OCRQueue } = require('./sockets.js')
+var { OCRQueue } = require('./queue.js')
 
 var indexRouter = require('./routes/index');
 var authRouter = require('./routes/jwtAuth.js');
