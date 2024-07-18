@@ -2,8 +2,7 @@ const { addNode, getAllNodes, removeNode, updateNodeStatus, getFirstReadyNode } 
 
 var { client } = require('./redisNodes')
 
-
-
+const { addToQueue } = require('./queue')
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -24,22 +23,18 @@ const initializeSockets = (server) => {
     nodeIo = io.of('/node');
     OCRIo = io.of('/ocr');
 
-    
-
     // node namespace
     nodeIo.on('connection', (socket) => {
         console.log('node connected');
         addNode(socket.id, 'ready');
 
-        
-
-
         socket.on('cheststatus', async (status, chestId) => {
             const chest = await Chest.findByIdAndUpdate(chestId, { status })
+
+
             console.log('new chest', chest, status)
             if (status === 'UPLOADED') {
-                const { OCRQueue } = require('./queue')
-                OCRQueue.add({chest: chest})
+                addToQueue(chest)
             }
         })
 
@@ -61,9 +56,12 @@ const initializeSockets = (server) => {
 
 
         socket.on('process_response', async (message) => {
-            const { chestId, name, type, source, time, status } = message
-            await Chest.findByIdAndUpdate(chestId, { name, type, source, time, status })
-            updateNodeStatus(socket.id, 'ready', 'ocr')})
+            console.log('OCR Readed chest', message)
+            const { chestId, name, type, source, time } = message
+            
+            await Chest.findByIdAndUpdate(chestId, { name, type, source, time })
+            updateNodeStatus(socket.id, 'ready', 'ocr')
+        })
 
         socket.on('disconnect', async () => {
             removeNode(socket.id, 'ocr')

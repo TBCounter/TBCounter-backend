@@ -4,7 +4,6 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require("cors");
-var { OCRQueue } = require('./queue.js')
 
 var indexRouter = require('./routes/index');
 var authRouter = require('./routes/jwtAuth.js');
@@ -14,9 +13,10 @@ var changelogRouter = require('./routes/changelog.js')
 var chestRouter = require('./routes/chests.js')
 var databaseRouter = require('./routes/database.js')
 
-const { createBullBoard } = require('@bull-board/api');
-const { BullAdapter } = require('@bull-board/api/bullAdapter');
 const { ExpressAdapter } = require('@bull-board/express');
+const serverAdapter = new ExpressAdapter();
+
+serverAdapter.setBasePath('/admin/queues');
 
 var app = express();
 
@@ -36,14 +36,9 @@ var corsOptions = {
 
 app.use(cors(corsOptions));
 
-const serverAdapter = new ExpressAdapter();
-serverAdapter.setBasePath('/admin/queues');
 
-const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
-  queues: [new BullAdapter(OCRQueue)],
-  serverAdapter: serverAdapter,
-});
-
+// bull-board route
+app.use('/admin/queues', serverAdapter.getRouter());
 
 
 
@@ -65,8 +60,6 @@ app.use('/images', imagesRouter);
 app.use('/changelog', changelogRouter);
 app.use('/chest', chestRouter)
 app.use('/db', databaseRouter)
-// bull-board route
-app.use('/admin/queues', serverAdapter.getRouter());
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -84,4 +77,4 @@ app.use(function (err, req, res, next) {
   res.send(err.message);
 });
 
-module.exports = app;
+module.exports = { app, serverAdapter };
