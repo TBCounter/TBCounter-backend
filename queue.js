@@ -6,7 +6,11 @@ const { Chest } = require('./storage');
 
 
 const queueOpts = {
-  redis: { host: process.env.REDIS_HOST, port: process.env.REDIS_PORT }
+  redis: { host: process.env.REDIS_HOST, port: process.env.REDIS_PORT },
+  settings: {
+    limit: { max: 1, duration: 1000 },
+    maxStalledCount: 0
+  }
 }
 
 
@@ -22,18 +26,18 @@ function initializeQueue(OCRIo) {
     try {
       payload.progress(0)
       await Chest.findByIdAndUpdate(payload.data.chest._id, { status: 'PROCESSING' })
-      payload.progress(10)
+      payload.progress(20)
       // Sending chest to process
       const readyOCRNode = await getFirstReadyNode('ocr')
       if (!Object.keys(readyOCRNode).length) {
         console.log('no ready ocr nodes')
         return
       }
-      payload.progress(20)
-      OCRIo.to(Object.keys(readyOCRNode)[0]).emit('process', payload.data.chest)
-      payload.progress(30)
-      updateNodeStatus(Object.keys(readyOCRNode)[0], 'busy', 'ocr')
       payload.progress(40)
+      OCRIo.to(Object.keys(readyOCRNode)[0]).emit('process', payload.data.chest)
+      payload.progress(60)
+      updateNodeStatus(Object.keys(readyOCRNode)[0], 'busy', 'ocr')
+      payload.progress(100)
 
       console.log('Queue done')
       done()
@@ -57,15 +61,30 @@ function initializeQueue(OCRIo) {
 
 
 function addToQueue(chest) {
-  console.log(`Queue added`)
-  OCRQueue.add({ chest })
+  console.log(`Queue added: ${chest}`)
+  OCRQueue.add({ chest }, {
+    attempts: 10,
+    backoff: {
+      type: 'exponential',
+      delay: 1000,
+      timeout: 6000
+    },
+  },)
 }
 
-function getOCRQueue(){
+function getOCRQueue() {
   if (!OCRQueue) {
     throw new Error('OCRQueue not initialized yet');
   }
   return OCRQueue
 }
 
-module.exports = { initializeQueue, addToQueue, getOCRQueue };
+async function pauseQueue() {
+  await OCRQueue.pause();
+}
+
+async function resumeQueue() {
+  await OCRQueue.resume();
+}
+
+module.exports = { initializeQueue, addToQueue, getOCRQueue, pauseQueue, resumeQueue };

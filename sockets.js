@@ -2,7 +2,7 @@ const { addNode, getAllNodes, removeNode, updateNodeStatus, getFirstReadyNode } 
 
 var { client } = require('./redisNodes')
 
-const { addToQueue } = require('./queue')
+const { addToQueue, pauseQueue, resumeQueue } = require('./queue')
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -50,9 +50,10 @@ const initializeSockets = (server) => {
         });
     })
 
-    OCRIo.on('connection', (socket) => {
+    OCRIo.on('connection', async (socket) => {
         console.log('ocr node connected');
         addNode(socket.id, 'ready', 'ocr');
+        await resumeQueue()
 
 
         socket.on('process_response', async (message) => {
@@ -65,6 +66,7 @@ const initializeSockets = (server) => {
 
         socket.on('disconnect', async () => {
             removeNode(socket.id, 'ocr')
+            await pauseQueue()
             console.log('node disconnected');
         });
 
