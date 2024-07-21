@@ -13,6 +13,9 @@ var changelogRouter = require('./routes/changelog.js')
 var chestRouter = require('./routes/chests.js')
 var databaseRouter = require('./routes/database.js')
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerJSdoc = require('swagger-jsdoc');
+
 const { ExpressAdapter } = require('@bull-board/express');
 const serverAdapter = new ExpressAdapter();
 
@@ -40,6 +43,21 @@ app.use(cors(corsOptions));
 // bull-board route
 app.use('/admin/queues', serverAdapter.getRouter());
 
+// swagger
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Totalbattle counter backend API',
+      version: '1.0.0',
+    },
+  },
+  apis: ['./routes/*.js'], // files containing annotations as above
+};
+
+const swaggerSpec = swaggerJSdoc(options);
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // view engine setup

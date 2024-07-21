@@ -8,12 +8,39 @@ const authorization = require('../middleware/authorization')
 
 // registration route
 
+/**
+ * @openapi
+ * /auth/register:
+ *   post:
+ *     description: registration
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Returns jwt token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ */
 router.post('/register', validInfo, async (req, res) => {
   try {
     const { email, password } = await req.body
 
 
-    const user = await db.users.findOne({where: {email: email }})
+    const user = await db.users.findOne({ where: { email: email } })
 
     if (user) {
       return res.status(401).send('user already exists')
@@ -26,10 +53,10 @@ router.post('/register', validInfo, async (req, res) => {
 
     const newUser = await db.users.create({ email: email, password: bcryptPassword })
     const token = jwtGenerator(newUser.id)
-    res.status(200).json({token})
+    res.status(200).json({ token })
   } catch (err) {
-      console.error(err.message)
-      res.status(500).send(err.message)
+    console.error(err.message)
+    res.status(500).send(err.message)
   }
 })
 
@@ -40,7 +67,7 @@ router.post("/login", validInfo, async (req, res) => {
 
     const { email, password } = req.body
 
-    const user = await db.users.findOne({where: {email: email }})
+    const user = await db.users.findOne({ where: { email: email } })
 
     if (!user) {
       return res.status(401).send('password or email is incorrect')
@@ -54,20 +81,22 @@ router.post("/login", validInfo, async (req, res) => {
 
     const token = jwtGenerator(user.id)
 
-    res.status(200).json({token})
+    res.status(200).json({ token })
   }
   catch (err) {
     console.error(err.message)
     res.status(500).send(err.message)
-}});
+  }
+});
 
 router.get('/is-verify', authorization, async (req, res) => {
   try {
 
     res.status(200).send('true')
   } catch (err) {
-      console.error(err.message)
-      res.status(500).send(err.message)
-  }})
+    console.error(err.message)
+    res.status(500).send(err.message)
+  }
+})
 
 module.exports = router
