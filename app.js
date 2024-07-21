@@ -45,6 +45,7 @@ app.use('/admin/queues', serverAdapter.getRouter());
 
 // swagger
 const options = {
+  failOnErrors: true,
   definition: {
     openapi: '3.0.0',
     info: {
