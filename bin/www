@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+var { app, serverAdapter } = require('../app');
 var debug = require('debug')('tbcounter-backend:server');
 var { connect_storage } = require('../storage');
 
@@ -13,7 +13,8 @@ var http = require('http');
 var server = http.createServer(app);
 
 
-var { client, initializeSockets } = require('../sockets');
+const { client, initializeSockets, getOCRIo } = require('../sockets');
+const { initializeQueue } = require('../queue')
 var { deleteAllNodes } = require('../redisNodes')
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
@@ -25,6 +26,24 @@ server.on('listening', onListening);
  */
 
 initializeSockets(server);
+
+initializeQueue(getOCRIo())
+
+
+const { getOCRQueue } = require('../queue')
+
+const { createBullBoard } = require('@bull-board/api');
+const { BullAdapter } = require('@bull-board/api/bullAdapter');
+
+
+
+createBullBoard({
+  queues: [new BullAdapter(getOCRQueue())],
+  serverAdapter: serverAdapter,
+});
+
+
+
 
 function normalizePort(val) {
   var port = parseInt(val, 10);
