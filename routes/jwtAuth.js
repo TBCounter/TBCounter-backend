@@ -6,8 +6,6 @@ const jwtGenerator = require('../utils/jwtGenerator')
 const validInfo = require('../middleware/validInfo')
 const authorization = require('../middleware/authorization')
 
-// registration route
-
 /**
  * @openapi
  * /auth/register:
@@ -60,8 +58,33 @@ router.post('/register', validInfo, async (req, res) => {
   }
 })
 
-// login route
-
+/**
+ * @openapi
+ * /auth/login:
+ *   post:
+ *     description: authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Returns jwt token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ */
 router.post("/login", validInfo, async (req, res) => {
   try {
 
