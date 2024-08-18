@@ -21,6 +21,26 @@ const s3Client = new S3Client({
 
 
 
+/**
+ * @openapi
+ * /db:
+ *   post:
+ *     description: Create new chest in DB
+ *     responses:
+ *       200:
+ *         description: Returns upload and download links
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uploadLink:
+ *                   type: string
+ *                 downloadLink:
+ *                   type: string
+ *                 chestId:
+ *                   type: string
+ */
 router.post('/', async function (req, res) {
   // create account id link to chests
   // let { accountId } = await req.body
