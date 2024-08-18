@@ -115,7 +115,7 @@ router.post('/cookie', authorization, async (req, res) => {
   }
 })
 
-router.get('/', async function(req, res) {
+router.get('/', authorization, async function(req, res) {
   try {
     const accounts = await db.accounts.findAll({ userId: req.user })
     res.status(200).json({accounts});
