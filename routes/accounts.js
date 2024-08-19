@@ -59,7 +59,7 @@ router.post('/run', authorization, async (req, res) => {
       login: account.login,
       password: account.password
     })
-    
+
     await client.hSet('nodes', nodeId, JSON.stringify({ status: 'busy', timestamp: Date.now() }))
 
     res.status(200).json({ result: "ok" })
@@ -73,41 +73,41 @@ router.post('/run', authorization, async (req, res) => {
 router.post('/cookie', authorization, async (req, res) => {
   try {
     const { accountId, cookie, url } = await req.body
-    
 
-        if (!accountId) {
-          res.status(400).send('provide account ID')
-        }
-          
-        if (!cookie) {
-          res.status(400).send('provide cookie')
-        }
-          
-        if (!url) {
-          res.status(400).send('provide url')
-        }
-    
-        const nodes = await getAllNodes()
-        let nodeId = ''
-        for (const property in nodes) {
-          let node = JSON.parse(nodes[property])
-          if (node.status === 'ready') {
-            nodeId = property
-          }
-        }
-        console.log(nodeId)
-        
-        const nodeIo = getNodeIo();
-        
-        nodeIo.to(nodeId).emit('run_cookie', {
-        address: 'https://totalbattle.com', // run url is from request
-        accountId: accountId,
-        cookie: cookie
-      })
 
-      await client.hSet('nodes', nodeId, JSON.stringify({ status: 'busy', timestamp: Date.now() }))
+    if (!accountId) {
+      res.status(400).send('provide account ID')
+    }
 
-      res.status(200).send('Running cookie, please wait...')
+    if (!cookie) {
+      res.status(400).send('provide cookie')
+    }
+
+    if (!url) {
+      res.status(400).send('provide url')
+    }
+
+    const nodes = await getAllNodes()
+    let nodeId = ''
+    for (const property in nodes) {
+      let node = JSON.parse(nodes[property])
+      if (node.status === 'ready') {
+        nodeId = property
+      }
+    }
+    console.log(nodeId)
+
+    const nodeIo = getNodeIo();
+
+    nodeIo.to(nodeId).emit('run_cookie', {
+      address: 'https://totalbattle.com', // run url is from request
+      accountId: accountId,
+      cookie: cookie
+    })
+
+    await client.hSet('nodes', nodeId, JSON.stringify({ status: 'busy', timestamp: Date.now() }))
+
+    res.status(200).send('Running cookie, please wait...')
   }
   catch (err) {
     console.error(err.message)
@@ -115,10 +115,10 @@ router.post('/cookie', authorization, async (req, res) => {
   }
 })
 
-router.get('/', authorization, async function(req, res) {
+router.get('/', authorization, async function (req, res) {
   try {
-    const accounts = await db.accounts.findAll({ userId: req.user })
-    res.status(200).json({accounts});
+    const accounts = await db.accounts.findAll({ where: { userId: req.user } })
+    res.status(200).json({ accounts });
   }
   catch (err) {
     console.error(err.message)
