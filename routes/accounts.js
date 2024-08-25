@@ -103,6 +103,9 @@ router.post('/cookie', authorization, async (req, res) => {
     }
     console.log(nodeId)
 
+    if (!nodeId) {
+      res.status(403).send('No ready nodes')
+    }
     const nodeIo = getNodeIo();
 
     nodeIo.to(nodeId).emit('run_cookie', {
