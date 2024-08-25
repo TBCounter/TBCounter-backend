@@ -74,6 +74,12 @@ router.post('/cookie', authorization, async (req, res) => {
   try {
     const { accountId, cookie, url } = await req.body
 
+    const isUsersAccount = await db.accounts.findAll({ where: { userId: req.user, id: accountId } })
+
+    console.log(isUsersAccount)
+    if (!isUsersAccount.length) {
+      res.status(400).send('Not your account')
+    }
 
     if (!accountId) {
       res.status(400).send('provide account ID')
