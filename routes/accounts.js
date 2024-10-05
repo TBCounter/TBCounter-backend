@@ -74,10 +74,10 @@ router.post('/cookie', authorization, async (req, res) => {
   try {
     const { accountId, cookie, url } = await req.body
 
-    const isUsersAccount = await db.accounts.findAll({ where: { userId: req.user, id: accountId } })
-
-    console.log(isUsersAccount)
-    if (!isUsersAccount.length) {
+    const usersAccount = await db.accounts.findOne({ where: { userId: req.user, id: accountId } })
+    console.log(cookie)
+    console.log(usersAccount)
+    if (!usersAccount) {
       res.status(400).send('Not your account')
     }
 
@@ -108,11 +108,25 @@ router.post('/cookie', authorization, async (req, res) => {
     }
     const nodeIo = getNodeIo();
 
-    nodeIo.to(nodeId).emit('run_cookie', {
-      address: 'https://totalbattle.com', // run url is from request
-      accountId: accountId,
-      cookie: cookie
-    })
+    usersAccount.new_cookie = cookie
+
+    await usersAccount.save()
+    if (usersAccount.old_cookie) {
+      nodeIo.to(nodeId).emit('run_cookie', {
+        address: 'https://totalbattle.com', // run url is from request
+        accountId: accountId,
+        cookie: usersAccount.old_cookie
+      })
+    } else {
+
+      nodeIo.to(nodeId).emit('run_cookie', {
+        address: 'https://totalbattle.com', // run url is from request
+        accountId: accountId,
+        cookie: cookie
+      })
+
+    }
+
 
     await client.hSet('nodes', nodeId, JSON.stringify({ status: 'busy', timestamp: Date.now() }))
 
