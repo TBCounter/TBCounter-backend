@@ -18,7 +18,7 @@ let OCRIo = null;
 
 const { Server } = require("socket.io");
 
-const { Chest } = require('./storage')
+const { Chest } = require('./storage');
 
 const initializeSockets = (server) => {
     const io = new Server(server);
@@ -83,38 +83,35 @@ const initializeSockets = (server) => {
     // user namespace
     userIo.on('connection', async (socket) => {
         console.log("user connected")
-        let token = socket.handshake.query.token;
+        const token = socket.handshake.query.token;
+        let jwttoken = token
         if (!token) {
             socket.emit("user_auth", "failed: no token provided")
-        } else {
+            socket.disconnect(true)
+        }
         try {
-            token = jwt.verify(token, process.env.SECRET_JWT_TOKEN)
+            jwttoken = jwt.verify(token, process.env.SECRET_JWT_TOKEN)
           } catch (err) {
             console.error(err.message)
-            return socket.emit("user_auth", "failed: bad token")
+            socket.emit("user_auth", "failed: bad token")
+            socket.disconnect(true)
+            return
           }
-          console.log(token.user)
+          console.log(jwttoken.user)
 
-          const accounts = await db.accounts.findAll({ where: { userId: token.user } })
+          const accounts = await db.accounts.findAll({ where: { userId: jwttoken.user } })
 
-          let payload = []
+          let user_accounts = []
           for (const account of accounts) {
-            payload.push(account.dataValues) 
+            user_accounts.push(account.dataValues) 
           }
+
+          user_nodes = JSON.parse(JSON.stringify(await getAllNodes()))
+          user_ocr_nodes = JSON.parse(JSON.stringify(await getAllNodes('ocr')))
+
+
           socket.emit("user_auth", "success")
-          socket.emit("user_accounts", payload)
-          /*
-
-          Post.findAll({
-            where: {
-              authorId: 2,
-            },
-          })
-          */
-
-
-
-        }
+          socket.emit("user_payload", user_accounts, user_nodes, user_ocr_nodes)
     });
 
     return io;
