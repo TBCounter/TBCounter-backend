@@ -7,6 +7,7 @@ const { addToQueue, pauseQueue, resumeQueue } = require('./queue')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
+const db = require('./db/index')
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -80,7 +81,7 @@ const initializeSockets = (server) => {
     })
 
     // user namespace
-    userIo.on('connection', (socket) => {
+    userIo.on('connection', async (socket) => {
         console.log("user connected")
         let token = socket.handshake.query.token;
         if (!token) {
@@ -92,7 +93,27 @@ const initializeSockets = (server) => {
             console.error(err.message)
             return socket.emit("user_auth", "failed: bad token")
           }
+          console.log(token.user)
+
+          const accounts = await db.accounts.findAll({ where: { userId: token.user } })
+
+          let payload = []
+          for (const account of accounts) {
+            payload.push(account.dataValues) 
+          }
           socket.emit("user_auth", "success")
+          socket.emit("user_accounts", payload)
+          /*
+
+          Post.findAll({
+            where: {
+              authorId: 2,
+            },
+          })
+          */
+
+
+
         }
     });
 
