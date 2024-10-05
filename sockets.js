@@ -107,12 +107,17 @@ const initializeSockets = (server) => {
             user_accounts.push(account.dataValues)
         }
 
-        let user_nodes = JSON.parse(JSON.stringify(await getAllNodes()))
-        let user_ocr_nodes = JSON.parse(JSON.stringify(await getAllNodes('ocr')))
+        function countNodesReduce(accumulator, currentValue) {
+            JSON.parse(currentValue).status === 'ready' ? accumulator.idle++ : accumulator.busy++
+            return accumulator
+        }
+
+        const user_nodes = Object.values(await getAllNodes()).reduce(countNodesReduce, { idle: 0, busy: 0 })
+        const user_ocr_nodes = Object.values(await getAllNodes('ocr')).reduce(countNodesReduce, { idle: 0, busy: 0 })
         console.log(user_nodes, user_ocr_nodes)
 
         socket.emit("user_auth", "success")
-        socket.emit("user_payload", {user_accounts, user_nodes, user_ocr_nodes})
+        socket.emit("user_payload", { user_accounts, user_nodes, user_ocr_nodes })
     });
 
     return io;
