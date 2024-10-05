@@ -4,6 +4,9 @@ var { client } = require('./redisNodes')
 
 const { addToQueue, pauseQueue, resumeQueue } = require('./queue')
 
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
+
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -78,7 +81,19 @@ const initializeSockets = (server) => {
 
     // user namespace
     userIo.on('connection', (socket) => {
-        console.log('user connected');
+        console.log("user connected")
+        let token = socket.handshake.query.token;
+        if (!token) {
+            socket.emit("user_auth", "failed: no token provided")
+        } else {
+        try {
+            token = jwt.verify(token, process.env.SECRET_JWT_TOKEN)
+          } catch (err) {
+            console.error(err.message)
+            return socket.emit("user_auth", "failed: bad token")
+          }
+          socket.emit("user_auth", "success")
+        }
     });
 
     return io;
