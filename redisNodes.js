@@ -10,7 +10,6 @@ client.on('error', (err) => {
 
 
 function addNode(nodeId, status, storage) {
-    console.log('node attached')
     client.hSet(storage || 'nodes', nodeId, JSON.stringify({ status: status, timestamp: Date.now() }));
 }
 
