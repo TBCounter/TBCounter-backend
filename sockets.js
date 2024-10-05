@@ -84,10 +84,11 @@ const initializeSockets = (server) => {
     userIo.on('connection', async (socket) => {
         console.log("user connected")
         const token = socket.handshake.query.token;
-        let jwttoken = token
+        let jwttoken;
         if (!token) {
             socket.emit("user_auth", "failed: no token provided")
             socket.disconnect(true)
+            return
         }
         try {
             jwttoken = jwt.verify(token, process.env.SECRET_JWT_TOKEN)
@@ -106,12 +107,12 @@ const initializeSockets = (server) => {
             user_accounts.push(account.dataValues) 
           }
 
-          user_nodes = JSON.parse(JSON.stringify(await getAllNodes()))
-          user_ocr_nodes = JSON.parse(JSON.stringify(await getAllNodes('ocr')))
-
+        let user_nodes = JSON.parse(JSON.stringify(await getAllNodes()))
+        let user_ocr_nodes = JSON.parse(JSON.stringify(await getAllNodes('ocr')))
+        console.log(user_nodes, user_ocr_nodes)
 
           socket.emit("user_auth", "success")
-          socket.emit("user_payload", user_accounts, user_nodes, user_ocr_nodes)
+        socket.emit("user_payload", {user_accounts, user_nodes, user_ocr_nodes})
     });
 
     return io;
