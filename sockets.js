@@ -63,7 +63,7 @@ const initializeSockets = (server) => {
         socket.on('process_response', async (message) => {
             console.log('OCR Readed chest', message)
             const { chestId, name, type, source, time } = message
-            
+
             await Chest.findByIdAndUpdate(chestId, { name, type, source, time })
             updateNodeStatus(socket.id, 'ready', 'ocr')
         })
@@ -92,26 +92,26 @@ const initializeSockets = (server) => {
         }
         try {
             jwttoken = jwt.verify(token, process.env.SECRET_JWT_TOKEN)
-          } catch (err) {
+        } catch (err) {
             console.error(err.message)
             socket.emit("user_auth", "failed: bad token")
             socket.disconnect(true)
             return
-          }
-          console.log(jwttoken.user)
+        }
+        console.log(jwttoken.user)
 
-          const accounts = await db.accounts.findAll({ where: { userId: jwttoken.user } })
+        const accounts = await db.accounts.findAll({ where: { userId: jwttoken.user } })
 
-          let user_accounts = []
-          for (const account of accounts) {
-            user_accounts.push(account.dataValues) 
-          }
+        let user_accounts = []
+        for (const account of accounts) {
+            user_accounts.push(account.dataValues)
+        }
 
         let user_nodes = JSON.parse(JSON.stringify(await getAllNodes()))
         let user_ocr_nodes = JSON.parse(JSON.stringify(await getAllNodes('ocr')))
         console.log(user_nodes, user_ocr_nodes)
 
-          socket.emit("user_auth", "success")
+        socket.emit("user_auth", "success")
         socket.emit("user_payload", {user_accounts, user_nodes, user_ocr_nodes})
     });
 
