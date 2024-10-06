@@ -18,7 +18,7 @@ let OCRIo = null;
 
 const { Server } = require("socket.io");
 
-const { Chest } = require('./storage');
+const { Chest, Session } = require('./storage');
 
 const initializeSockets = (server) => {
     const io = new Server(server);
@@ -31,6 +31,11 @@ const initializeSockets = (server) => {
     nodeIo.on('connection', (socket) => {
         console.log('node connected');
         addNode(socket.id, 'ready');
+
+        socket.on('session', async(sessionId, startTime) => {
+            console.log(sessionId, startTime)
+            await Session.create({ session_id: sessionId, start_time: startTime})
+        })
 
         socket.on('cheststatus', async (status, chestId) => {
             const chest = await Chest.findByIdAndUpdate(chestId, { status })
