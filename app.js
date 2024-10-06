@@ -12,6 +12,7 @@ var imagesRouter = require('./routes/images.js')
 var changelogRouter = require('./routes/changelog.js')
 var chestRouter = require('./routes/chests.js')
 var databaseRouter = require('./routes/database.js')
+var sessionRouter = require('./routes/sessions.js')
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSdoc = require('swagger-jsdoc');
@@ -79,6 +80,7 @@ app.use('/images', imagesRouter);
 app.use('/changelog', changelogRouter);
 app.use('/chest', chestRouter)
 app.use('/db', databaseRouter)
+app.use('/sessions', sessionRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

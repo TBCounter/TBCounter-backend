@@ -20,6 +20,7 @@ const { Server } = require("socket.io");
 
 const { Chest, Session } = require('./storage');
 
+
 const initializeSockets = (server) => {
     const io = new Server(server);
 
@@ -32,9 +33,9 @@ const initializeSockets = (server) => {
         console.log('node connected');
         addNode(socket.id, 'ready');
 
-        socket.on('session', async (sessionId, startTime) => {
-            console.log(sessionId, startTime)
-            await Session.create({ session_id: sessionId, start_time: startTime })
+        socket.on('session', async (sessionId, startTime, accountId) => {
+            console.log(sessionId, startTime, accountId)
+            await Session.create({ session_id: sessionId, start_time: startTime, account_id: accountId })
         })
 
         socket.on('cheststatus', async (status, chestId) => {
