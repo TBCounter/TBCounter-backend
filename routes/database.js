@@ -43,13 +43,14 @@ const s3Client = new S3Client({
  */
 router.post('/', async function (req, res) {
   // create account id link to chests
-   let { accountId } = await req.body
-  console.log( "account: " + accountId )
+   let { accountId, sessionId } = await req.body
+  console.log( "sessionId: " + sessionId )
 
   const chestId = await Chest.create({
     status: "CREATED",
     got_at: new Date(),
-    account_id: accountId
+    account_id: accountId,
+    session_id: sessionId
   })
   
   console.log(chestId.id)
