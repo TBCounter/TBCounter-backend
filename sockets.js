@@ -32,9 +32,9 @@ const initializeSockets = (server) => {
         console.log('node connected');
         addNode(socket.id, 'ready');
 
-        socket.on('session', async(sessionId, startTime) => {
+        socket.on('session', async (sessionId, startTime) => {
             console.log(sessionId, startTime)
-            await Session.create({ session_id: sessionId, start_time: startTime})
+            await Session.create({ session_id: sessionId, start_time: startTime })
         })
 
         socket.on('cheststatus', async (status, chestId) => {
@@ -120,18 +120,15 @@ const initializeSockets = (server) => {
         const user_nodes = Object.values(await getAllNodes()).reduce(countNodesReduce, { idle: 0, busy: 0 })
         const user_ocr_nodes = Object.values(await getAllNodes('ocr')).reduce(countNodesReduce, { idle: 0, busy: 0 })
         console.log(user_nodes, user_ocr_nodes)
-        try {
-            user_chests = await Chest.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $sort: { count: -1 } }])
-            console.log(user_chests)
-        } catch (err) {
-            console.log(err)
-        }
 
-        let user_chest_status = {}
-        for (let count = 0; count < user_chests.length; count++) {
-            user_chest_status.status = user_chests[count]._id
-            user_chest_status.count = user_chests[count].count
-        }
+        const user_chests = await Chest.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $sort: { count: -1 } }])
+            .catch(e => {
+                console.log(e)
+            })
+
+        // create object with { [user_chests._id]: user_chests.count}
+        const user_chest_status = {}
+        user_chests.forEach(el => { user_chest_status[el._id] = el.count })
 
         socket.emit("user_auth", "success")
         socket.emit("user_payload", { user_accounts, user_nodes, user_ocr_nodes, user_chest_status })
