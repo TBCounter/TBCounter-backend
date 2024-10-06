@@ -83,6 +83,11 @@ const initializeSockets = (server) => {
             console.log('node updated', { message, id: socket.id })
             updateNodeStatus(socket.id, message, 'ocr')
         });
+
+        socket.on("session_status", async (message) => {
+            const { sessionId, end_time, status } = message
+            await Session.findByIdAndUpdate(sessionId, { end_time, status})
+        });
     })
 
     // user namespace
