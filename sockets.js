@@ -109,7 +109,18 @@ const initializeSockets = (server) => {
 
         let user_accounts = []
         for (const account of accounts) {
-            user_accounts.push(account.dataValues)
+
+            const user_chests = await Chest.aggregate([{ $match: { account_id: account.id } }, { $group: { _id: '$status', count: { $sum: 1 } } }])
+                .catch(e => {
+                    console.log(e)
+                })
+
+            // create object with { [user_chests._id]: user_chests.count}
+            const user_chest_status = {}
+            user_chests.forEach(el => { user_chest_status[el._id] = el.count })
+
+            user_accounts.push({ ...account.dataValues, session: user_chest_status })
+
         }
 
         function countNodesReduce(accumulator, currentValue) {
@@ -119,19 +130,10 @@ const initializeSockets = (server) => {
 
         const user_nodes = Object.values(await getAllNodes()).reduce(countNodesReduce, { idle: 0, busy: 0 })
         const user_ocr_nodes = Object.values(await getAllNodes('ocr')).reduce(countNodesReduce, { idle: 0, busy: 0 })
-        console.log(user_nodes, user_ocr_nodes)
 
-        const user_chests = await Chest.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $sort: { count: -1 } }])
-            .catch(e => {
-                console.log(e)
-            })
-
-        // create object with { [user_chests._id]: user_chests.count}
-        const user_chest_status = {}
-        user_chests.forEach(el => { user_chest_status[el._id] = el.count })
 
         socket.emit("user_auth", "success")
-        socket.emit("user_payload", { user_accounts, user_nodes, user_ocr_nodes, user_chest_status })
+        socket.emit("user_payload", { user_accounts, user_nodes, user_ocr_nodes })
     });
 
     return io;
