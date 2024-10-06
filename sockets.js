@@ -110,7 +110,35 @@ const initializeSockets = (server) => {
         let user_accounts = []
         for (const account of accounts) {
 
-            const user_chests = await Chest.aggregate([{ $match: { account_id: account.id } }, { $group: { _id: '$status', count: { $sum: 1 } } }])
+            const user_chests = await Chest.aggregate([
+                {
+                    $lookup: {
+                        from: 'sessions',  // Название коллекции с сессиями
+                        localField: 'session_id',  // Поле в коллекции сундуков
+                        foreignField: 'session_id',  // Поле в коллекции сессий
+                        as: 'session'  // Имя поля для результатов объединения
+                    }
+                },
+                {
+                    $unwind: '$session'  // Развернуть массив сессий (делает их объектами)
+                },
+                {
+                    $match: {
+                        'session.status': 'ACTIVE',  // Фильтр по статусу сессии
+                        account_id: account.id  // Фильтр по account_id
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$status',  // Группировка по статусу сундука
+                        count: { $sum: 1 }  // Подсчет количества сундуков
+                    }
+                },
+                {
+                    $sort: { count: -1 }  // Сортировка по количеству
+                }
+            ])
+
                 .catch(e => {
                     console.log(e)
                 })
