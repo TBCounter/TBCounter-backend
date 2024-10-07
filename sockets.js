@@ -35,7 +35,7 @@ const initializeSockets = (server) => {
 
         socket.on('session', async (sessionId, startTime, accountId) => {
             console.log(sessionId, startTime, accountId)
-            await Session.create({ session_id: sessionId, start_time: startTime, account_id: accountId })
+            await Session.create({ session_id: sessionId, start_time: startTime, account_id: accountId, status: "ACTIVE" })
         })
 
         socket.on('cheststatus', async (status, chestId) => {
@@ -57,6 +57,11 @@ const initializeSockets = (server) => {
         socket.on("status", async (message) => {
             console.log('node updated', { message, id: socket.id })
             updateNodeStatus(socket.id, message)
+        });
+
+        socket.on("session_status", async (message) => {
+            const { sessionId, end_time, status } = message
+            await Session.findByIdAndUpdate(sessionId, { end_time, status })
         });
     })
 
@@ -83,11 +88,6 @@ const initializeSockets = (server) => {
         socket.on("status", async (message) => {
             console.log('node updated', { message, id: socket.id })
             updateNodeStatus(socket.id, message, 'ocr')
-        });
-
-        socket.on("session_status", async (message) => {
-            const { sessionId, end_time, status } = message
-            await Session.findByIdAndUpdate(sessionId, { end_time, status})
         });
     })
 
