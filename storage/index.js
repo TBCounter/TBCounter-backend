@@ -29,6 +29,12 @@ const sessionSchema = new mongoose.Schema({
     end_time: Date,
     status: String, // ACTIVE, DONE, ERROR
     account_id: String,
+    log: [
+        {
+            message: String,
+            timestamp: { type: Date, default: Date.now },
+        }
+    ],
 });
 
 

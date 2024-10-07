@@ -20,6 +20,24 @@ const { Server } = require("socket.io");
 
 const { Chest, Session } = require('./storage');
 
+function saveLogToSession(sessionId, message) {
+    Session.findOneAndUpdate(
+        { session_id: sessionId },
+        { $push: { log: { message } } }, // Добавляем новое сообщение в массив логов
+        { new: true } // Возвращаем обновлённую сессию
+    )
+        .then(session => {
+            if (!session) {
+                console.error('Сессия не найдена');
+                return;
+            }
+            console.log('Лог добавлен успешно:', session);
+        })
+        .catch(err => {
+            console.error('Ошибка при обновлении сессии:', err);
+        });
+}
+
 
 const initializeSockets = (server) => {
     const io = new Server(server);
@@ -36,7 +54,7 @@ const initializeSockets = (server) => {
 
         socket.on('session', async (sessionId, startTime, accountId) => {
             console.log(sessionId, startTime, accountId)
-            await Session.create({ session_id: sessionId, start_time: startTime, account_id: accountId, status: "ACTIVE" })
+            await Session.create({ session_id: sessionId, start_time: startTime, account_id: accountId, status: "ACTIVE", log: [] })
         })
 
         socket.on('cheststatus', async (status, chestId) => {
@@ -55,15 +73,20 @@ const initializeSockets = (server) => {
             console.log('node disconnected');
         });
 
-        socket.on("status", async (message) => {
+        socket.on("status", async ({ message, sessionId }) => {
             console.log('node updated', { message, id: socket.id })
             updateNodeStatus(socket.id, message)
             await sendNodesUpdatesToAllUsers()
+            if (!sessionId) return
+            saveLogToSession(sessionId, message)
         });
 
-        socket.on("session_status", async (message) => {
-            const { sessionId, end_time, status } = message
-            await Session.findByIdAndUpdate(sessionId, { end_time, status })
+        socket.on("session_status", async ({ sessionId, end_time, status }) => {
+            await Session.findOneAndUpdate(
+                { session_id: sessionId }, // Используем session_id для поиска
+                { end_time, status },
+                { new: true } // Возвращаем обновлённую запись
+            );
         });
     })
 
@@ -96,7 +119,7 @@ const initializeSockets = (server) => {
             updateNodeStatus(socket.id, message, 'ocr')
             await sendNodesUpdatesToAllUsers()
 
-            
+
         });
     })
 
