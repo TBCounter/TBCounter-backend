@@ -1,4 +1,4 @@
-const { addNode, getAllNodes, removeNode, updateNodeStatus, getFirstReadyNode } = require('./redisNodes');
+const { addNode, getAllNodes, removeNode, updateNodeStatus, addUser, getAllUsers, removeUser } = require('./redisNodes');
 
 var { client } = require('./redisNodes')
 
@@ -32,6 +32,7 @@ const initializeSockets = (server) => {
     nodeIo.on('connection', (socket) => {
         console.log('node connected');
         addNode(socket.id, 'ready');
+        sendNodesUpdatesToAllUsers()
 
         socket.on('session', async (sessionId, startTime, accountId) => {
             console.log(sessionId, startTime, accountId)
@@ -49,14 +50,15 @@ const initializeSockets = (server) => {
         })
 
         socket.on('disconnect', async () => {
-            console.log(await getAllNodes());
             removeNode(socket.id)
+            await sendNodesUpdatesToAllUsers()
             console.log('node disconnected');
         });
 
         socket.on("status", async (message) => {
             console.log('node updated', { message, id: socket.id })
             updateNodeStatus(socket.id, message)
+            await sendNodesUpdatesToAllUsers()
         });
 
         socket.on("session_status", async (message) => {
@@ -69,25 +71,32 @@ const initializeSockets = (server) => {
         console.log('ocr node connected');
         addNode(socket.id, 'ready', 'ocr');
         await resumeQueue()
+        await sendNodesUpdatesToAllUsers()
 
 
         socket.on('process_response', async (message) => {
             console.log('OCR Readed chest', message)
             const { chestId, name, type, source, time } = message
 
-            await Chest.findByIdAndUpdate(chestId, { name, type, source, time })
+            const updatedChest = await Chest.findByIdAndUpdate(chestId, { name, type, source, time })
             updateNodeStatus(socket.id, 'ready', 'ocr')
+            console.log('chest update!', updatedChest)
+            await sendChestUpdatesToUsers(updatedChest.account_id)
         })
 
         socket.on('disconnect', async () => {
             removeNode(socket.id, 'ocr')
             await pauseQueue()
+            await sendNodesUpdatesToAllUsers()
             console.log('node disconnected');
         });
 
         socket.on("status", async (message) => {
             console.log('node updated', { message, id: socket.id })
             updateNodeStatus(socket.id, message, 'ocr')
+            await sendNodesUpdatesToAllUsers()
+
+            
         });
     })
 
@@ -109,9 +118,96 @@ const initializeSockets = (server) => {
             socket.disconnect(true)
             return
         }
-        console.log(jwttoken.user)
 
-        const accounts = await db.accounts.findAll({ where: { userId: jwttoken.user } })
+        // here user passed all the checks
+        addUser(socket.id, jwttoken.user);
+
+        await sendChestUpdatesToUsers()
+        await sendNodesUpdatesToAllUsers()
+
+        socket.emit("user_auth", "success")
+
+
+
+        socket.on("disconnect", async () => {
+            removeUser(socket.id)
+        })
+
+    });
+
+    return io;
+};
+
+const getNodeIo = () => {
+    if (!nodeIo) {
+        throw new Error('Sockets not initialized yet');
+    }
+    return nodeIo;
+};
+
+const getOCRIo = () => {
+    if (!OCRIo) {
+        throw new Error('Sockets not initialized yet');
+    }
+    return OCRIo;
+};
+
+
+const getUSERIo = () => {
+    if (!getUSERIo) {
+        throw new Error('Sockets not initialized yet');
+    }
+    return userIo;
+};
+
+
+
+
+async function sendNodesUpdatesToAllUsers() {
+    // send updates to all users
+
+    const allConnectedUsers = await getAllUsers()
+    console.log(allConnectedUsers)
+
+    for (const [socketId, userId] of Object.entries(allConnectedUsers)) {
+
+
+
+        function countNodesReduce(accumulator, currentValue) {
+            JSON.parse(currentValue).status === 'ready' ? accumulator.idle++ : accumulator.busy++
+            return accumulator
+        }
+
+
+
+        const user_nodes = Object.values(await getAllNodes()).reduce(countNodesReduce, { idle: 0, busy: 0 })
+        const user_ocr_nodes = Object.values(await getAllNodes('ocr')).reduce(countNodesReduce, { idle: 0, busy: 0 })
+
+
+        const socket = getUSERIo()
+
+        socket.to(socketId).emit("nodes_update", { user_nodes, user_ocr_nodes })
+    }
+}
+
+
+
+async function sendChestUpdatesToUsers(accountId) {
+    // send updates to user with this account id
+
+    const allConnectedUsers = await getAllUsers()
+
+    if (accountId) {
+        const account = await db.accounts.findByPk(accountId)
+        console.log(account.userId)
+
+        if (!Object.values(allConnectedUsers).includes(account.userId)) {
+            return
+        }
+    }
+
+    for (const [socketId, userId] of Object.entries(allConnectedUsers)) {
+        const accounts = await db.accounts.findAll({ where: { userId: userId } })
 
         let user_accounts = []
         for (const account of accounts) {
@@ -157,34 +253,16 @@ const initializeSockets = (server) => {
 
         }
 
-        function countNodesReduce(accumulator, currentValue) {
-            JSON.parse(currentValue).status === 'ready' ? accumulator.idle++ : accumulator.busy++
-            return accumulator
-        }
 
-        const user_nodes = Object.values(await getAllNodes()).reduce(countNodesReduce, { idle: 0, busy: 0 })
-        const user_ocr_nodes = Object.values(await getAllNodes('ocr')).reduce(countNodesReduce, { idle: 0, busy: 0 })
+        const socket = getUSERIo()
 
+        socket.to(socketId).emit("user_payload", user_accounts)
 
-        socket.emit("user_auth", "success")
-        socket.emit("user_payload", { user_accounts, user_nodes, user_ocr_nodes })
-    });
-
-    return io;
-};
-
-const getNodeIo = () => {
-    if (!nodeIo) {
-        throw new Error('Sockets not initialized yet');
     }
-    return nodeIo;
-};
+}
 
-const getOCRIo = () => {
-    if (!OCRIo) {
-        throw new Error('Sockets not initialized yet');
-    }
-    return OCRIo;
-};
+
+
+
 
 module.exports = { initializeSockets, nodeIo, userIo, client, getNodeIo, getOCRIo };
