@@ -14,8 +14,8 @@ router.get('/', authorization, async function (req, res) {
     return res.status(401).send('Invalid account')
   }
 
-  const user = await db.accounts.findOne({ where: { id: accountId } })
-  if (!user) {
+  const account = await db.accounts.findOne({ where: { id: accountId } })
+  if (!account) {
     return res.status(401).send('Invalid account')
   }
 
