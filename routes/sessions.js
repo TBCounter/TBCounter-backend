@@ -21,7 +21,10 @@ router.get('/', authorization, async function (req, res) {
 
   const accSessions = await Session.aggregate([
     {
-      $match: { account_id: accountId }  // Фильтр по account_id
+      $match: {
+        account_id: accountId, // Фильтр по account_id
+        status: { $ne: 'ACTIVE' }  // Фильтр по статусу
+      }
     },
     {
       $lookup: {
