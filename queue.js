@@ -61,7 +61,7 @@ function initializeQueue(OCRIo) {
 
 
 function addToQueue(chest) {
-  console.log(`Queue added: ${chest}`)
+  // console.log(`Queue added: ${chest}`)
   OCRQueue.add({ chest }, {
     attempts: 10,
     backoff: {
