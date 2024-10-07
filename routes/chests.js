@@ -5,7 +5,7 @@ var { Chest } = require('../storage')
 
 /* GET home page. */
 router.get('/', async function (req, res, next) {
-
+    return res.status(500)
     // const newChest = new Chest({ name: 'Склеп 5 уровень' });
 
     // await newChest.save();

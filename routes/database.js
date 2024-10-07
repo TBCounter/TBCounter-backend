@@ -44,7 +44,6 @@ const s3Client = new S3Client({
 router.post('/', async function (req, res) {
   // create account id link to chests
    let { accountId, sessionId } = await req.body
-  console.log( "sessionId: " + sessionId )
 
   const chestId = await Chest.create({
     status: "CREATED",
@@ -53,7 +52,6 @@ router.post('/', async function (req, res) {
     session_id: sessionId
   })
   
-  console.log(chestId.id)
 
   let url = await generateSignedUrl(chestId.id) // add type
   let getUrl = await generateSignedGetUrl(chestId.id)
@@ -82,8 +80,6 @@ async function generateSignedUrl(objectKey) {
         // Generate a signed URL
         const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
         
-
-        console.log("Signed URL:", signedUrl);
         return signedUrl
     } catch (err) {
         console.error("Error generating signed URL:", err);
@@ -102,8 +98,6 @@ async function generateSignedGetUrl(objectKey) {
       // Generate a signed URL
       const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
       
-
-      console.log("Signed URL:", signedUrl);
       return signedUrl
   } catch (err) {
       console.error("Error generating signed URL:", err);

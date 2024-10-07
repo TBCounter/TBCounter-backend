@@ -31,7 +31,6 @@ function saveLogToSession(sessionId, message) {
                 console.error('Сессия не найдена');
                 return;
             }
-            console.log('Лог добавлен успешно:', session);
         })
         .catch(err => {
             console.error('Ошибка при обновлении сессии:', err);
@@ -52,19 +51,17 @@ const initializeSockets = (server) => {
         addNode(socket.id, 'ready');
         sendNodesUpdatesToAllUsers()
 
-        socket.on('session', async (sessionId, startTime, accountId) => {
-            console.log(sessionId, startTime, accountId)
+        socket.on('session', async ({ sessionId, startTime, accountId }) => {
             await Session.create({ session_id: sessionId, start_time: startTime, account_id: accountId, status: "ACTIVE", log: [] })
         })
 
         socket.on('cheststatus', async (status, chestId) => {
             const chest = await Chest.findByIdAndUpdate(chestId, { status })
 
-
-            console.log('new chest', chest, status)
             if (status === 'UPLOADED') {
                 addToQueue(chest)
             }
+            await sendChestUpdatesToUsers(chest.account_id)
         })
 
         socket.on('disconnect', async () => {
@@ -79,6 +76,9 @@ const initializeSockets = (server) => {
             await sendNodesUpdatesToAllUsers()
             if (!sessionId) return
             saveLogToSession(sessionId, message)
+
+            const accountId = Session.findOne({ session_id: sessionId }).account_id
+            sendChestUpdatesToUsers(accountId)
         });
 
         socket.on("session_status", async ({ sessionId, end_time, status }) => {
@@ -98,12 +98,10 @@ const initializeSockets = (server) => {
 
 
         socket.on('process_response', async (message) => {
-            console.log('OCR Readed chest', message)
             const { chestId, name, type, source, time } = message
 
             const updatedChest = await Chest.findByIdAndUpdate(chestId, { name, type, source, time })
             updateNodeStatus(socket.id, 'ready', 'ocr')
-            console.log('chest update!', updatedChest)
             await sendChestUpdatesToUsers(updatedChest.account_id)
         })
 
@@ -115,7 +113,6 @@ const initializeSockets = (server) => {
         });
 
         socket.on("status", async (message) => {
-            console.log('node updated', { message, id: socket.id })
             updateNodeStatus(socket.id, message, 'ocr')
             await sendNodesUpdatesToAllUsers()
 
@@ -190,7 +187,6 @@ async function sendNodesUpdatesToAllUsers() {
     // send updates to all users
 
     const allConnectedUsers = await getAllUsers()
-    console.log(allConnectedUsers)
 
     for (const [socketId, userId] of Object.entries(allConnectedUsers)) {
 
@@ -222,7 +218,6 @@ async function sendChestUpdatesToUsers(accountId) {
 
     if (accountId) {
         const account = await db.accounts.findByPk(accountId)
-        console.log(account.userId)
 
         if (!Object.values(allConnectedUsers).includes(account.userId)) {
             return

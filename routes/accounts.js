@@ -50,7 +50,6 @@ router.post('/run', authorization, async (req, res) => {
         nodeId = property
       }
     }
-    console.log(nodeId)
 
     const nodeIo = getNodeIo();
 
@@ -76,7 +75,6 @@ router.post('/cookie', authorization, async (req, res) => {
 
     const isUsersAccount = await db.accounts.findAll({ where: { userId: req.user, id: accountId } })
 
-    console.log(isUsersAccount)
     if (!isUsersAccount.length) {
       res.status(400).send('Not your account')
     }

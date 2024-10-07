@@ -71,7 +71,6 @@ router.get('/', authorization, async function (req, res) {
       }
     }
   ]);
-  console.log(accSessions)
   res.status(200).json(accSessions)
 });
 
