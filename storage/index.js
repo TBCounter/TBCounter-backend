@@ -10,6 +10,7 @@ async function connect_storage() {
 
 const chestSchema = new mongoose.Schema({
     account_id: String,
+    session_id: String,
     got_at: Date,
     status: String, // CREATED, UPLOADED, PROCESSING, PROCESSED, ERROR
     // OCR readed values
@@ -22,8 +23,23 @@ const chestSchema = new mongoose.Schema({
     url: String,
 });
 
+const sessionSchema = new mongoose.Schema({
+    session_id: String,
+    start_time: Date,
+    end_time: Date,
+    status: String, // ACTIVE, DONE, ERROR
+    account_id: String,
+    log: [
+        {
+            message: String,
+            timestamp: { type: Date, default: Date.now },
+        }
+    ],
+});
+
 
 const Chest = mongoose.model('Chest', chestSchema);
+const Session = mongoose.model('Session', sessionSchema);
 
 
-module.exports = { mongoose, connect_storage, Chest }
+module.exports = { mongoose, connect_storage, Chest, Session }

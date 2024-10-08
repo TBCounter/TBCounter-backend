@@ -1,110 +1,115 @@
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-const authorization = require('../middleware/authorization')
+const authorization = require("../middleware/authorization");
 
-const db = require('../db/index')
+const db = require("../db/index");
 
-const { getNodeIo } = require('../sockets')
+const { getNodeIo } = require("../sockets");
 
-const { getAllNodes, client, updateNodeStatus } = require('../redisNodes')
+const { getAllNodes, client, updateNodeStatus } = require("../redisNodes");
 
 // create new account
 
-router.post('/', authorization, async (req, res) => {
+router.post("/", authorization, async (req, res) => {
   try {
-    const { name } = await req.body
+    const { name } = await req.body;
 
     if (!name) {
-      return res.status(401).send('account must have a name')
+      return res.status(401).send("account must have a name");
     }
 
-    const newAccount = await db.accounts.create({ name: name, ...req.body, userId: req.user })
-    res.status(200).json({ newAccount })
-  }
-  catch (err) {
-    console.error(err.message)
-    res.status(500).send(err.message)
+    const newAccount = await db.accounts.create({
+      name: name,
+      ...req.body,
+      userId: req.user,
+    });
+    res.status(200).json({ newAccount });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send(err.message);
   }
 });
 
-
-router.post('/run', authorization, async (req, res) => {
+router.post("/run", authorization, async (req, res) => {
   try {
-    const { accountId } = await req.body
+    const { accountId } = await req.body;
 
     if (!accountId) {
-      return res.status(400).send('provide account ID')
+      return res.status(400).send("provide account ID");
     }
 
-    const account = await db.accounts.findByPk(accountId, { where: { userId: req.user } })
+    const account = await db.accounts.findByPk(accountId, {
+      where: { userId: req.user },
+    });
 
     if (!account) {
-      return res.status(404).send('Account not found')
+      return res.status(404).send("Account not found");
     }
 
-    const nodes = await getAllNodes()
-    let nodeId = ''
+    const nodes = await getAllNodes();
+    let nodeId = "";
     for (const property in nodes) {
-      let node = JSON.parse(nodes[property])
-      if (node.status === 'ready') {
-        nodeId = property
+      let node = JSON.parse(nodes[property]);
+      if (node.status === "ready") {
+        nodeId = property;
       }
     }
-    console.log(nodeId)
 
     const nodeIo = getNodeIo();
 
-    nodeIo.to(nodeId).emit('run_account', {
-      address: 'https://totalbattle.com', // run url is from request
+    nodeIo.to(nodeId).emit("run_account", {
+      address: "https://totalbattle.com", // run url is from request
       login: account.login,
-      password: account.password
-    })
+      password: account.password,
+    });
 
-    await client.hSet('nodes', nodeId, JSON.stringify({ status: 'busy', timestamp: Date.now() }))
+    await client.hSet(
+      "nodes",
+      nodeId,
+      JSON.stringify({ status: "busy", timestamp: Date.now() })
+    );
 
-    res.status(200).json({ result: "ok" })
-  }
-  catch (err) {
-    console.error(err.message)
-    res.status(500).send(err.message)
+    res.status(200).json({ result: "ok" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send(err.message);
   }
 });
 
-router.post('/cookie', authorization, async (req, res) => {
+router.post("/cookie", authorization, async (req, res) => {
   try {
-    const { accountId, cookie, url } = await req.body
+    const { accountId, cookie, url, open } = await req.body;
+
 
     const usersAccount = await db.accounts.findOne({ where: { userId: req.user, id: accountId } })
-    console.log(cookie)
-    console.log(usersAccount)
     if (!usersAccount) {
       res.status(400).send('Not your account')
     }
 
     if (!accountId) {
-      res.status(400).send('provide account ID')
+      res.status(400).send("provide account ID");
     }
 
     if (!cookie) {
-      res.status(400).send('provide cookie')
+      res.status(400).send("provide cookie");
     }
 
     if (!url) {
-      res.status(400).send('provide url')
+      res.status(400).send("provide url");
     }
 
-    const nodes = await getAllNodes()
-    let nodeId = ''
+    const nodes = await getAllNodes();
+    let nodeId = "";
     for (const property in nodes) {
-      let node = JSON.parse(nodes[property])
-      if (node.status === 'ready') {
-        nodeId = property
+      let node = JSON.parse(nodes[property]);
+      if (node.status === "ready") {
+        nodeId = property;
       }
     }
-    console.log(nodeId)
+    console.log(nodeId);
 
     if (!nodeId) {
-      res.status(403).send('No ready nodes')
+      res.status(403).send("No ready nodes");
     }
     const nodeIo = getNodeIo();
 
@@ -115,37 +120,41 @@ router.post('/cookie', authorization, async (req, res) => {
       nodeIo.to(nodeId).emit('run_cookie', {
         address: 'https://totalbattle.com', // run url is from request
         accountId: accountId,
-        cookie: usersAccount.old_cookie
+        cookie: usersAccount.old_cookie,
+        open
       })
     } else {
 
       nodeIo.to(nodeId).emit('run_cookie', {
         address: 'https://totalbattle.com', // run url is from request
         accountId: accountId,
-        cookie: cookie
+        cookie: cookie,
+        open
       })
 
     }
 
 
-    await client.hSet('nodes', nodeId, JSON.stringify({ status: 'busy', timestamp: Date.now() }))
+    await client.hSet(
+      "nodes",
+      nodeId,
+      JSON.stringify({ status: "busy", timestamp: Date.now() })
+    );
 
-    res.status(200).send('Running cookie, please wait...')
+    res.status(200).send("Running cookie, please wait...");
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send(err.message);
   }
-  catch (err) {
-    console.error(err.message)
-    res.status(500).send(err.message)
-  }
-})
+});
 
-router.get('/', authorization, async function (req, res) {
+router.get("/", authorization, async function (req, res) {
   try {
-    const accounts = await db.accounts.findAll({ where: { userId: req.user } })
+    const accounts = await db.accounts.findAll({ where: { userId: req.user } });
     res.status(200).json({ accounts });
-  }
-  catch (err) {
-    console.error(err.message)
-    res.status(500).send(err.message)
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send(err.message);
   }
 });
 

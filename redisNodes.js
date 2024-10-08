@@ -8,9 +8,22 @@ client.on('error', (err) => {
 });
 
 
+// Функция для добавления пользователя с socketId и userId
+function addUser(socketId, userId) {
+    client.hSet('users', socketId, userId);
+}
+
+// Функция для получения всех пользователей
+async function getAllUsers() {
+    return await client.hGetAll('users');
+}
+
+// Функция для удаления пользователя по socketId
+function removeUser(socketId) {
+    client.hDel('users', socketId);
+}
 
 function addNode(nodeId, status, storage) {
-    console.log('node attached')
     client.hSet(storage || 'nodes', nodeId, JSON.stringify({ status: status, timestamp: Date.now() }));
 }
 
@@ -70,4 +83,4 @@ function deleteAllNodes() {
     client.flushAll()
 }
 
-module.exports = { client, addNode, updateNodeStatus, getNodeStatus, removeNode, getAllNodes, deleteAllNodes, getFirstReadyNode }
+module.exports = { client, addNode, updateNodeStatus, getNodeStatus, removeNode, getAllNodes, deleteAllNodes, getFirstReadyNode, addUser, getAllUsers, removeUser }

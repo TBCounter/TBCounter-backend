@@ -30,9 +30,9 @@ function initializeQueue(OCRIo) {
       // Sending chest to process
       const readyOCRNode = await getFirstReadyNode('ocr')
       if (!Object.keys(readyOCRNode).length) {
-        console.log('no ready ocr nodes')
-        return
-      }
+        console.log('no ready ocr nodes');
+        return done(new Error('No ready OCR nodes'));
+    }
       payload.progress(40)
       OCRIo.to(Object.keys(readyOCRNode)[0]).emit('process', payload.data.chest)
       payload.progress(60)
@@ -61,7 +61,7 @@ function initializeQueue(OCRIo) {
 
 
 function addToQueue(chest) {
-  console.log(`Queue added: ${chest}`)
+  // console.log(`Queue added: ${chest}`)
   OCRQueue.add({ chest }, {
     attempts: 10,
     backoff: {
