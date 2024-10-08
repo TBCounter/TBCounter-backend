@@ -45,6 +45,13 @@ module.exports = (sequelize, Sequelize) => {
     vip: {
       type: Sequelize.BOOLEAN
     },
+
+    new_cookie:{
+      type: Sequelize.JSONB
+    },
+    old_cookie: {
+      type: Sequelize.JSONB
+    }
   });
 
   return Account;
