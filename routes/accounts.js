@@ -110,28 +110,31 @@ router.post("/cookie", authorization, async (req, res) => {
 
     if (!nodeId) {
       res.status(403).send("No ready nodes");
+      return
     }
     const nodeIo = getNodeIo();
 
-    usersAccount.new_cookie = cookie
-
-    await usersAccount.save()
-    if (usersAccount.old_cookie) {
+    if (cookie.log_cookie === '' || cookie.PTBHSSID === '') {
+      if (!usersAccount.old_cookie) {
+        res.status(400).send("Bad cookie")
+        return
+      }
       nodeIo.to(nodeId).emit('run_cookie', {
         address: 'https://totalbattle.com', // run url is from request
         accountId: accountId,
-        cookie: usersAccount.old_cookie,
+        cookie: usersAccount.old_cookie, //run with old cookie if new cookie is empty
         open
       })
     } else {
+      usersAccount.old_cookie = cookie // save new good cookie
+      await usersAccount.save()
 
       nodeIo.to(nodeId).emit('run_cookie', {
-        address: 'https://totalbattle.com', // run url is from request
+        address: 'https://totalbattle.com',
         accountId: accountId,
         cookie: cookie,
         open
       })
-
     }
 
 
