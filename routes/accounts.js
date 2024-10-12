@@ -84,18 +84,22 @@ router.post("/cookie", authorization, async (req, res) => {
     const usersAccount = await db.accounts.findOne({ where: { userId: req.user, id: accountId } })
     if (!usersAccount) {
       res.status(400).send('Not your account')
+      return
     }
 
     if (!accountId) {
       res.status(400).send("provide account ID");
+      return
     }
 
     if (!cookie) {
       res.status(400).send("provide cookie");
+      return
     }
 
     if (!url) {
       res.status(400).send("provide url");
+      return
     }
 
     const nodes = await getAllNodes();
