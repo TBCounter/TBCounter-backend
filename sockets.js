@@ -57,8 +57,10 @@ const initializeSockets = (server) => {
     console.log("node connected");
     addNode(socket.id, "ready");
     sendNodesUpdatesToAllUsers();
+    let savedSessionId;
 
     socket.on("session", async ({ sessionId, startTime, accountId }) => {
+      savedSessionId = sessionId;
       await Session.create({
         session_id: sessionId,
         start_time: startTime,
@@ -81,6 +83,15 @@ const initializeSockets = (server) => {
       removeNode(socket.id);
       await sendNodesUpdatesToAllUsers();
       console.log("node disconnected");
+
+      // По идее это временное решение, так как нода у нас падает когда отключается от бэка
+      // можно не ронять ее, а просто сундуки в какую-нибудь очередь сохранять
+      const currentSession = await Session.findOneAndUpdate(
+        { session_id: savedSessionId }, // Используем session_id для поиска
+        { end_time, status: "ERROR" },
+        { new: true } // Возвращаем обновлённую запись
+      );
+      await sendChestUpdatesToUsers(currentSession.account_id);
     });
 
     socket.on("status", async ({ message, sessionId }) => {
