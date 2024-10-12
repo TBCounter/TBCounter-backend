@@ -50,10 +50,10 @@ router.get("/", authorization, async function (req, res, next) {
     // Установка заголовков для скачивания
     res.header("Content-Type", "text/csv");
     res.attachment("chests.csv");
-    res.send(csv);
+    return res.send(csv);
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal server error");
+    return res.status(500).send("Internal server error");
   }
 });
 
@@ -77,7 +77,7 @@ router.get("/session", authorization, async (req, res, next) => {
   // Установка заголовков для скачивания
   res.header("Content-Type", "text/csv");
   res.attachment("chests.csv");
-  res.send(csv);
+  return res.send(csv);
 });
 
 module.exports = router;

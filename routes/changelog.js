@@ -33,17 +33,17 @@ router.get('/', async (req, res) => {
 
     if (lang === 'EN') {
       let logs = yaml.load(fs.readFileSync('./changelogs/changelogEN.yaml', 'utf8'));
-      res.status(200).send(logs)
+      return res.status(200).send(logs);
     } else if (lang === 'RU') {
       let logs = yaml.load(fs.readFileSync('./changelogs/changelogRU.yaml', 'utf8'));
-      res.status(200).send(logs)
+      return res.status(200).send(logs);
     }
     else {
-      res.status(400).send('language reqired')
+      return res.status(400).send("language reqired");
     }
   } catch (err) {
     console.error(err.message)
-    res.status(500).send(err.message)
+    return res.status(500).send(err.message);
   }
 })
 

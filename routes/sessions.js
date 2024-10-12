@@ -97,7 +97,7 @@ router.get("/", authorization, async function (req, res) {
       },
     },
   ]);
-  res.status(200).json(accSessions);
+  return res.status(200).json(accSessions);
 });
 
 router.delete("/", authorization, async (req, res) => {
@@ -116,7 +116,7 @@ router.delete("/", authorization, async (req, res) => {
 
   await Session.deleteOne({ session_id: sessionId });
 
-  res.status(200).json({ deleted: count });
+  return res.status(200).json({ deleted: count });
 });
 
 module.exports = router;
