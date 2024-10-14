@@ -7,6 +7,7 @@ const db = require("../db/index");
 const { getNodeIo } = require("../sockets");
 
 const { getAllNodes, client, updateNodeStatus } = require("../redisNodes");
+const { Socket } = require("socket.io");
 
 // create new account
 
@@ -114,27 +115,30 @@ router.post("/cookie", authorization, async (req, res) => {
     }
     const nodeIo = getNodeIo();
 
-    if (cookie.log_cookie === '' || cookie.PTBHSSID === '') {
-      if (!usersAccount.old_cookie) {
-        res.status(400).send("Bad cookie")
-        return
-      }
+    nodeIo.on("connection", (socket) => {
+      socket.on('game is loading', async (goodCookie) => {
+        console.log('game is loading')
+        usersAccount.old_cookie = goodCookie // save new good cookie
+        await usersAccount.save()
+      })})
+
+    if (usersAccount.old_cookie) {
       nodeIo.to(nodeId).emit('run_cookie', {
         address: 'https://totalbattle.com', // run url is from request
         accountId: accountId,
         cookie: usersAccount.old_cookie, //run with old cookie if new cookie is empty
         open
       })
-    } else {
-      usersAccount.old_cookie = cookie // save new good cookie
-      await usersAccount.save()
-
+    } else if (!cookie.log_cookie === '' || !cookie.PTBHSSID === '') {
       nodeIo.to(nodeId).emit('run_cookie', {
-        address: 'https://totalbattle.com',
+        address: 'https://totalbattle.com', // run url is from request
         accountId: accountId,
-        cookie: cookie,
+        cookie: cookie, //run with old cookie if new cookie is empty
         open
       })
+    } else {
+      res.status(400).send("Bad cookie")
+      return
     }
 
 
