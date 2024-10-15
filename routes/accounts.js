@@ -129,7 +129,7 @@ router.post("/cookie", authorization, async (req, res) => {
         cookie: usersAccount.old_cookie, //run with old cookie if new cookie is empty
         open
       })
-    } else if (!cookie.log_cookie === '' || !cookie.PTBHSSID === '') {
+    } else if (cookie.log_cookie && cookie.PTBHSSID) {
       nodeIo.to(nodeId).emit('run_cookie', {
         address: 'https://totalbattle.com', // run url is from request
         accountId: accountId,
