@@ -1,11 +1,15 @@
-const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
-var express = require('express');
+var express = require("express");
 var router = express.Router();
-const { Chest } = require('../storage')
+const { Chest } = require("../storage");
 
-const REGION = 'eu-north-1'
+const REGION = "eu-north-1";
 const BUCKET_NAME = "tbcounter-screenshots";
 const accessKeyId = process.env.S3_ACCESS_KEY;
 const secretAccessKey = process.env.S3_SECRET_KEY;
@@ -15,11 +19,9 @@ const s3Client = new S3Client({
   region: REGION,
   credentials: {
     accessKeyId: accessKeyId,
-    secretAccessKey: secretAccessKey
-  }
+    secretAccessKey: secretAccessKey,
+  },
 });
-
-
 
 /**
  * @openapi
@@ -41,22 +43,21 @@ const s3Client = new S3Client({
  *                 chestId:
  *                   type: string
  */
-router.post('/', async function (req, res) {
+router.post("/", async function (req, res) {
   // create account id link to chests
-   let { accountId, sessionId } = await req.body
+  let { accountId, sessionId } = await req.body;
 
   const chestId = await Chest.create({
     status: "CREATED",
     got_at: new Date(),
     account_id: accountId,
-    session_id: sessionId
-  })
-  
+    session_id: sessionId,
+  });
 
-  let url = await generateSignedUrl(chestId.id) // add type
-  let getUrl = await generateSignedGetUrl(chestId.id)
+  let url = await generateSignedUrl(chestId.id); // add type
+  let getUrl = await generateSignedGetUrl(chestId.id);
 
-  await Chest.findByIdAndUpdate(chestId, {url: getUrl})
+  await Chest.findByIdAndUpdate(chestId, { url: getUrl });
 
   // Идти на AWS, получить ссылку для загрузки изрображения для файла с именем chestId.id
   // Записать ссылку на скачивание изображения в chest в mongo (url поле в монго)
@@ -64,44 +65,49 @@ router.post('/', async function (req, res) {
 
   // Нода получает ссылку на загрузку. Загружает изображение и по вебсокетам меняет статус сундука на uploaded
 
-  res.status(200).json({ uploadLink: url, downloadLink: getUrl, chestId: chestId.id })
+  return res
+    .status(200)
+    .json({ uploadLink: url, downloadLink: getUrl, chestId: chestId.id });
 });
 
-
 async function generateSignedUrl(objectKey) {
-    try {
-        // Create a GetObjectCommand
-        const command = new PutObjectCommand({
-            Bucket: BUCKET_NAME,
-            Key: `${objectKey}.png`,
-            ContentType: 'image/png'
-        });
+  try {
+    // Create a GetObjectCommand
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: `${objectKey}.png`,
+      ContentType: "image/png",
+    });
 
-        // Generate a signed URL
-        const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-        
-        return signedUrl
-    } catch (err) {
-        console.error("Error generating signed URL:", err);
-    }
+    // Generate a signed URL
+    const signedUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+    });
+
+    return signedUrl;
+  } catch (err) {
+    console.error("Error generating signed URL:", err);
+  }
 }
 
 async function generateSignedGetUrl(objectKey) {
   try {
-      // Create a GetObjectCommand
-      const command = new GetObjectCommand({
-          Bucket: BUCKET_NAME,
-          Key: `${objectKey}.png`,
-          ContentType: 'image/png'
-      });
+    // Create a GetObjectCommand
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: `${objectKey}.png`,
+      ContentType: "image/png",
+    });
 
-      // Generate a signed URL
-      const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-      
-      return signedUrl
+    // Generate a signed URL
+    const signedUrl = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+    });
+
+    return signedUrl;
   } catch (err) {
-      console.error("Error generating signed URL:", err);
+    console.error("Error generating signed URL:", err);
   }
 }
 
-module.exports = router
+module.exports = router;

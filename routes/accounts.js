@@ -24,10 +24,10 @@ router.post("/", authorization, async (req, res) => {
       ...req.body,
       userId: req.user,
     });
-    res.status(200).json({ newAccount });
+    return res.status(200).json({ newAccount });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send(err.message);
+    return res.status(500).send(err.message);
   }
 });
 
@@ -70,10 +70,10 @@ router.post("/run", authorization, async (req, res) => {
       JSON.stringify({ status: "busy", timestamp: Date.now() })
     );
 
-    res.status(200).json({ result: "ok" });
+    return res.status(200).json({ result: "ok" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send(err.message);
+    return res.status(500).send(err.message);
   }
 });
 
@@ -81,22 +81,23 @@ router.post("/cookie", authorization, async (req, res) => {
   try {
     const { accountId, cookie, url, open } = await req.body;
 
-
-    const usersAccount = await db.accounts.findOne({ where: { userId: req.user, id: accountId } })
+    const usersAccount = await db.accounts.findOne({
+      where: { userId: req.user, id: accountId },
+    });
     if (!usersAccount) {
-      res.status(400).send('Not your account')
+      return res.status(400).send("Not your account");
     }
 
     if (!accountId) {
-      res.status(400).send("provide account ID");
+      return res.status(400).send("provide account ID");
     }
 
     if (!cookie) {
-      res.status(400).send("provide cookie");
+      return res.status(400).send("provide cookie");
     }
 
     if (!url) {
-      res.status(400).send("provide url");
+      return res.status(400).send("provide url");
     }
 
     const nodes = await getAllNodes();
@@ -123,8 +124,8 @@ router.post("/cookie", authorization, async (req, res) => {
       })})
 
     if (usersAccount.old_cookie) {
-      nodeIo.to(nodeId).emit('run_cookie', {
-        address: 'https://totalbattle.com', // run url is from request
+      nodeIo.to(nodeId).emit("run_cookie", {
+        address: "https://totalbattle.com", // run url is from request
         accountId: accountId,
         cookie: usersAccount.old_cookie, //run with old cookie if new cookie is empty
         open
@@ -141,27 +142,26 @@ router.post("/cookie", authorization, async (req, res) => {
       return
     }
 
-
     await client.hSet(
       "nodes",
       nodeId,
       JSON.stringify({ status: "busy", timestamp: Date.now() })
     );
 
-    res.status(200).send("Running cookie, please wait...");
+    return res.status(200).send("Running cookie, please wait...");
   } catch (err) {
     console.error(err.message);
-    res.status(500).send(err.message);
+    return res.status(500).send(err.message);
   }
 });
 
 router.get("/", authorization, async function (req, res) {
   try {
     const accounts = await db.accounts.findAll({ where: { userId: req.user } });
-    res.status(200).json({ accounts });
+    return res.status(200).json({ accounts });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send(err.message);
+    return res.status(500).send(err.message);
   }
 });
 
