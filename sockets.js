@@ -125,6 +125,9 @@ const initializeSockets = (server) => {
         { end_time, status },
         { new: true } // Возвращаем обновлённую запись
       );
+      if (["ERROR", "DONE"].includes(status)) {
+        savedSessionId = undefined;
+      }
       await sendChestUpdatesToUsers(currentSession.account_id);
     });
   });
