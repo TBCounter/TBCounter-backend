@@ -58,6 +58,13 @@ const initializeSockets = (server) => {
     addNode(socket.id, "ready");
     sendNodesUpdatesToAllUsers();
     let savedSessionId;
+    let lastStatus;
+
+    socket.conn.on("packet", function (packet) {
+      if (packet.type === "pong") {
+        addNode(socket.id, lastStatus);
+      }
+    });
 
     socket.on("session", async ({ sessionId, startTime, accountId }) => {
       savedSessionId = sessionId;
@@ -96,6 +103,7 @@ const initializeSockets = (server) => {
 
     socket.on("status", async ({ message, sessionId }) => {
       console.log("node updated", { message, id: socket.id });
+      lastStatus = message;
       updateNodeStatus(socket.id, message);
       await sendNodesUpdatesToAllUsers();
       if (!sessionId) return;
@@ -118,6 +126,14 @@ const initializeSockets = (server) => {
   OCRIo.on("connection", async (socket) => {
     console.log("ocr node connected");
     addNode(socket.id, "ready", "ocr");
+    let lastStatus;
+
+    socket.conn.on("packet", function (packet) {
+      if (packet.type === "pong") {
+        addNode(socket.id, lastStatus, "ocr");
+      }
+    });
+
     await resumeQueue();
     await sendNodesUpdatesToAllUsers();
 
@@ -143,6 +159,7 @@ const initializeSockets = (server) => {
 
     socket.on("status", async (message) => {
       updateNodeStatus(socket.id, message, "ocr");
+      lastStatus = message;
       await sendNodesUpdatesToAllUsers();
     });
   });
