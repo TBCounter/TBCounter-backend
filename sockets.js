@@ -95,7 +95,7 @@ const initializeSockets = (server) => {
       // можно не ронять ее, а просто сундуки в какую-нибудь очередь сохранять
       const currentSession = await Session.findOneAndUpdate(
         { session_id: savedSessionId }, // Используем session_id для поиска
-        { end_time, status: "ERROR" },
+        { end_time: new Date(), status: "ERROR" },
         { new: true } // Возвращаем обновлённую запись
       );
       await sendChestUpdatesToUsers(currentSession.account_id);
