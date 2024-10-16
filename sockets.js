@@ -98,6 +98,12 @@ const initializeSockets = (server) => {
         { end_time: new Date(), status: "ERROR" },
         { new: true } // Возвращаем обновлённую запись
       );
+      if (!currentSession) {
+        console.log(
+          "сессия не была найдена( Скорее всего у пользователя теперь нет возможности запуститься"
+        );
+        return;
+      }
       await sendChestUpdatesToUsers(currentSession.account_id);
     });
 
