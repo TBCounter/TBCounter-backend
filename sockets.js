@@ -62,7 +62,7 @@ const initializeSockets = (server) => {
 
     socket.conn.on("packet", function (packet) {
       if (packet.type === "pong") {
-        addNode(socket.id, lastStatus);
+        addNode(socket.id, lastStatus || "ready");
       }
     });
 
