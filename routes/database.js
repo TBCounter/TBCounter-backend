@@ -101,7 +101,7 @@ async function generateSignedGetUrl(objectKey) {
 
     // Generate a signed URL
     const signedUrl = await getSignedUrl(s3Client, command, {
-      expiresIn: 3600,
+      expiresIn: 604800,
     });
 
     return signedUrl;
