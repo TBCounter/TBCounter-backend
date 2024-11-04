@@ -16,10 +16,16 @@ const queueOpts = {
 
 let OCRQueue = null
 
-function initializeQueue(OCRIo) {
+async function initializeQueue(OCRIo) {
   console.log('QUEUE INITIALIZED!')
-  
+
   OCRQueue = new Bull('OCRProcess', queueOpts)
+
+  // Добавляем обработку сундуков со статусом "ERROR"
+  const errorChests = await Chest.find({ status: 'ERROR' });
+  for (const chest of errorChests) {
+    addToQueue(chest);  // добавляем сундук в очередь
+  }
 
   OCRQueue.process(async (payload, done) => {
     console.log('Queue started')
@@ -32,7 +38,7 @@ function initializeQueue(OCRIo) {
       if (!Object.keys(readyOCRNode).length) {
         console.log('no ready ocr nodes');
         return done(new Error('No ready OCR nodes'));
-    }
+      }
       payload.progress(40)
       OCRIo.to(Object.keys(readyOCRNode)[0]).emit('process', payload.data.chest)
       payload.progress(60)
